@@ -231,9 +231,9 @@ const SUN_BASE=[
 {id:'a6',name:'Laptop',cat:'IT',qty:1,val:4200,cpv:'30213100-6',specs:[['RAM',16,'GB'],['SSD',512,'GB'],['Ecran',15,'"']]},
 {id:'a7',name:'Set mese și scaune',cat:'Mobilier',qty:1,val:8000,cpv:'39100000-3',specs:[['Locuri',20,'']]},
 {id:'a8',name:'Plăcuțe informative (2 buc.)',cat:'Promovare',qty:2,val:400,cpv:'',specs:[['Format','A4',''],['Material','PVC','']]}];
-const SUN_SUP={HoReCa:['Horeca Pro Echipamente','Gastro Line Distribuție','Bucătăria Pro'],IT:['TechDepo Distribuție','Digital Office Solutions','NetPro Systems'],Mobilier:['Atelier Mobilier Plus','Office Design Mobila','Lemn și Birou'],Beauty:['Salon Expert Distribuție','Beauty Pro Echipamente','Coafor Line'],Promovare:['Print Express'],Altele:['Echipamente Total','Distribuție Pro','Tehnic Furnizare']};
+const SUN_SUP={HoReCa:['Horeca Pro Echipamente','Gastro Line Distribuție','Bucătăria Pro'],IT:['TechDepo Distribuție','Digital Office Solutions','NetPro Systems'],Mobilier:['Atelier Mobilier Plus','Office Design Mobila','Lemn și Birou'],Beauty:['Salon Expert Distribuție','Beauty Pro Echipamente','Coafor Line'],Promovare:['Print Express'],'Energie verde':['Solar Install Pro','Green Energy Systems','Fotovoltaic Expert'],Altele:['Echipamente Total','Distribuție Pro','Tehnic Furnizare']};
 const SUN_FEE={dosar:149,proiect:1190};
-const SUN_AVAIL={HoReCa:4,IT:5,Mobilier:3,Beauty:3,Promovare:2,Altele:2};
+const SUN_AVAIL={HoReCa:4,IT:5,Mobilier:3,Beauty:3,Promovare:2,'Energie verde':4,Altele:2};
 const specTxt=([k,v,u],min=true)=>v==null||v===''?k:typeof v==='number'?`${k} ${min?'≥ ':''}${String(v).replace('.',',')}${u?(u==='"'?'':' ')+u:''}`:`${k}: ${v}`;
 function makeOffers(it){const sups=SUN_SUP[it.cat]||SUN_SUP.HoReCa;const f=[1.03,0.86,0.97];
 return sups.slice(0,it.val<1000?1:3).map((name,i)=>{const bad=i===1&&it.specs.some(s=>typeof s[1]==='number');const off=it.specs.map(([k,v,u])=>[k,typeof v==='number'?(bad&&k===it.specs.find(s=>typeof s[1]==='number')[0]?Math.max(1,Math.floor(v*0.5)):(v>=10&&i===2?Math.round(v*1.15):v)):v,u]);
@@ -241,15 +241,15 @@ return {name,price:Math.round(it.val*f[i]/10)*10,days:[7,10,5][i],war:[24,12,36]
 /* ---- extragerea achizițiilor din documentele încărcate ---- */
 const cap=t=>t?t.charAt(0).toUpperCase()+t.slice(1):t;
 const toNum=x=>{let t=String(x).replace(/\s/g,'');if(/^0\.\d+$/.test(t))return parseFloat(t);if(/,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.');else if(/\.\d{3}$/.test(t)||/\.\d{3}\./.test(t))t=t.replace(/\./g,'');else t=t.replace(',','.');return parseFloat(t)};
-const CATKW=[['HoReCa',/frigor|chiuvet|aluat|panifica|patiser|cofetar|malaxor|dospitor|feliator|laminor|friteuz|gr[ăa]tar|abator|cutter|espres|cafe|râșni|rasni|frigid|congel|cuptor|vitrin|vase|plit|hot[ăa]|blender|mixer|patiser|bucăt|bucat|gastro|răcitor|racitor|cafetier/i],['Beauty',/coafor|cosmetic|manichiur|pedichiur|spălător|spalator|unghii|epila/i],['IT',/laptop|calculator|\bpc\b|desktop|monitor|imprimant|multifunc|\bpos\b|marcat|tablet|telefon|server|router|software|licen[țt]|\bsite\b|magazin online/i],['Mobilier',/mobilier|\bmas[ăa]\b|mese|scaun|birou|dulap|raft|canapea|fotoliu|recep[țt]/i],['Promovare',/plăcu[țt]|placut|afi[șs]|banner|autocolant/i]];
-const CPV_BY={HoReCa:'39221000-7',IT:'30200000-1',Mobilier:'39100000-3',Beauty:'',Promovare:'',Altele:''};
+const CATKW=[['Energie verde',/fotovolt|invertor|panou(ri)? (solar|fotovolt)|baterie de stocare|pomp[ăa] de c[ăa]ldur|solar\b|eolian/i],['HoReCa',/frigor|chiuvet|aluat|panifica|patiser|cofetar|malaxor|dospitor|feliator|laminor|friteuz|gr[ăa]tar|abator|cutter|espres|cafe|râșni|rasni|frigid|congel|cuptor|vitrin|vase|plit|hot[ăa]|blender|mixer|patiser|bucăt|bucat|gastro|răcitor|racitor|cafetier/i],['Beauty',/coafor|cosmetic|manichiur|pedichiur|spălător|spalator|unghii|epila/i],['IT',/laptop|calculator|\bpc\b|desktop|monitor|imprimant|multifunc|\bpos\b|marcat|tablet|telefon|server|router|software|licen[țt]|\bsite\b|magazin online/i],['Mobilier',/mobilier|\bmas[ăa]\b|mese|scaun|birou|dulap|raft|canapea|fotoliu|recep[țt]/i],['Promovare',/plăcu[țt]|placut|afi[șs]|banner|autocolant/i]];
+const CPV_BY={'Energie verde':'09331200-0',HoReCa:'39221000-7',IT:'30200000-1',Mobilier:'39100000-3',Beauty:'',Promovare:'',Altele:''};
 const guessCat=n=>{for(const [c,re] of CATKW)if(re.test(n))return c;return 'Altele'};
 const COUNTU=['grupuri','grup','tăvi','tavi','locuri','posturi','motoare','module','arzătoare','arzatoare','sertare','porturi','uși','usi'];
-const SPEC_RE=/(\d+(?:[.,]\d+)?)\s*(rpm|lt\b|v\b|m2|mp\b|°|"|”|″|inch|bar|litri|l\b|gb|tb|kw|w\b|cm|mm|kg|grupuri|grup|tăvi|tavi|locuri|posturi|motoare|module|arzătoare|sertare|porturi)?/i;
+const SPEC_RE=/(?<![A-Za-z\d])(\d+(?:[.,]\d+)?)\s*(rpm|lt\b|v\b|m2|mp\b|°|"|”|″|inch|bar|litri|l\b|gb|tb|kw|w\b|cm|mm|kg|grupuri|grup|tăvi|tavi|locuri|posturi|motoare|module|arzătoare|sertare|porturi)?/i;
 function parseSpec(seg){const t=seg.trim().replace(/^(și|si|cu)\s+/i,'').replace(/[.;]+$/,'');if(!t)return null;
 if(/\d\s*[x×\/]\s*\d|\d\s*-\s*\d|\d\.\.\.\+?\d/i.test(t)&&!/:/.test(t))return [cap(t),null,''];
 const ci=t.indexOf(':');if(ci>0&&ci<40){const lab=cap(t.slice(0,ci).trim());const rest=t.slice(ci+1).trim();const mm=rest.match(/^(?:min\.?|minim|minimum)?\s*(\d+(?:[.,]\d+)?)\s*(°c?|"|”|inch|bar|litri|l|gb|tb|kw|w|cm|mm|kg|v|a)?\.?$/i);if(mm){let u=(mm[2]||'');u={litri:'L',l:'L',inch:'"','”':'"',gb:'GB',tb:'TB',kw:'kW',w:'W',kg:'kg',v:'V',a:'A','°c':'°C'}[u.toLowerCase()]||u;return [lab,toNum(mm[1]),u]}return rest?[`${lab}: ${rest}`,null,'']:null}const m=t.match(SPEC_RE);
-if(!m)return [cap(t),null,''];const v=toNum(m[1]);let u=(m[2]||'').toLowerCase();u={litri:'L',l:'L',lt:'L',v:'V',m2:'m²',mp:'m²',inch:'"','”':'"','″':'"',gb:'GB',tb:'TB',kw:'kW',w:'W'}[u]||u;
+if(!m)return [cap(t),null,''];if(t.replace(m[0],'').trim().split(/\s+/).length>5)return [cap(t),null,''];const v=toNum(m[1]);let u=(m[2]||'').toLowerCase();u={litri:'L',l:'L',lt:'L',v:'V',m2:'m²',mp:'m²',inch:'"','”':'"','″':'"',gb:'GB',tb:'TB',kw:'kW',w:'W'}[u]||u;
 let label=t.replace(m[0],' ').replace(/\b(min|minim|minimum|maxim|max)\b\.?|cel pu[țt]in/gi,' ').replace(/[:≥>=]/g,' ').replace(/\s+/g,' ').trim();
 if(COUNTU.includes(u)){label=(cap(u==='grup'?'grupuri':u)+' '+label).trim();u=''}
 label=cap(label||({'"':'Ecran',L:'Volum',GB:'Capacitate',kW:'Putere',bar:'Presiune',cm:'Dimensiune',kg:'Capacitate'}[u]||'Valoare'));return [label,v,u]}
@@ -259,12 +259,13 @@ const PRODKW=/(frigid|congel|cuptor|malaxor|dospitor|feliator|laminor|mixer|robo
 const isTitle=l=>/^[A-ZĂÂÎȘŞȚŢ0-9]/.test(l)&&!/^[^:]{0,30}:\s/.test(l)&&!/^[-–•*·]/.test(l)&&l.split(/\s+/).length>=2&&!/^(buc|bucati|bucăți)\b/i.test(l);
 const isStop=l=>/^(total|subtotal|tva|valoare total|termen|valabilitate|modalitate|condi[țt]ii|plata|livrare|garan[țt]ie general|cu stim|semn[ăa]tur|ofert[ăa] valabil)/i.test(l);
 function amountsIn(l){return [...l.matchAll(AMT_RE)].map(m=>toNum(m[1]||m[2])).filter(n=>!isNaN(n)&&n>0)}
-function specsFrom(lines){const out=[];lines.forEach(l=>{l.replace(/^[-–•*·]\s*/,'').split(/;\s*|,\s+(?=[A-ZĂÂÎȘȚa-zăâîșț]+[^,]*[:\d])/).forEach(seg=>{const t=seg.trim().replace(/[–—-]\s*$/,'').trim();if(t.length<2||t.length>90)return;const sp=parseSpec(t);if(sp)out.push(sp)})});return out.slice(0,8)}
+function specsFrom(lines,join=true){const out=[];const J=[];lines.forEach(l=>{const prev=J[J.length-1];if(join&&prev!==undefined&&!/[,.;:)]$/.test(prev)&&/^[a-zăâîșț(]/.test(l))J[J.length-1]=prev+' '+l;else J.push(l)});const L2=[];J.forEach(l=>{const par=[...l.matchAll(/\(([^()]*\d[^()]*)\)/g)];par.forEach(p=>L2.push(p[1]));L2.push(par.length?l.replace(/\([^()]*\d[^()]*\)/g,' ').replace(/\s+/g,' ').trim():l)});L2.forEach(l=>{l.replace(/^[-–•*·]\s*/,'').split(/;\s*|,\s+(?=[A-ZĂÂÎȘȚ])|,\s+(?=[a-zăâîșț]+[^,]*[:\d])/).forEach(seg=>{const t=seg.trim().replace(/[–—-]\s*$/,'').trim();if(t.length<2||t.length>90)return;const sp=parseSpec(t);if(sp)out.push(sp)})});return out.slice(0,8)}
 function splitAnchor(l){const am=amountsIn(l);if(!am.length)return null;const q=l.match(QTY_RE)||l.match(QTY_RE2);if(!(q||am.length>=2||/lei|ron/i.test(l)))return null;
 let cut=l.length;if(q)cut=Math.min(cut,l.indexOf(q[0]));const fa=l.search(/\d[\d.,\s]*\s*(lei|ron)\b|\d{1,3}(\.\d{3})+(,\d{2})?|\d+,\d{2}/i);if(fa>=0)cut=Math.min(cut,fa);
 const left=l.slice(0,cut).replace(/\s+\d{1,3}\s*$/,'').replace(/\b(buc(ăți|ati)?|bucata|um)\.?\s*$/i,'').replace(/[–—-]\s*$/,'').trim();
-return {qty:q?parseInt(q[1]):null,val:am[am.length-1],left}}
-function heuristic(text){const bp=blockParse(text);if(bp.length)return bp;text=text.replace(/ ?¦ ?/g,' ');const all=text.split(/\n+/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
+const qn=q?parseInt(q[1]):1;let val=am[am.length-1];if(am.length>=3){for(const a of am){if([1.21,1.19,1.09,1.05].some(r=>Math.abs(a*qn*r-val)<=Math.max(1,val*0.003))){val=Math.round(a*qn*100)/100;break}}}
+const cur=/€|\beur\b|\beuro\b/i.test(l)?'EUR':'RON';return {qty:q?parseInt(q[1]):null,val,left,cur}}
+function heuristic(text){const bp=blockParse(text);if(bp.length)return bp;text=text.split('\n').map(l=>{const m=l.match(/^(§?)(\d{1,4})\s*¦\s*(.*)$/);return m&&amountsIn(m[3]).length&&!/\b(buc|bucăți|bucati|set|pcs|um)\b/i.test(m[3])?m[1]+m[3]+' ¦ '+m[2]+' buc':l}).join('\n');text=text.replace(/ ?¦ ?/g,' ');const all=text.split(/\n+/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
 let start=all.findIndex(l=>/(produs|denumire|descriere|articol)/i.test(l.replace(/^§/,''))&&/(buc|cant|pre[țt]|total|valoare|\bum\b)/i.test(l));start=start>=0?start+1:0;
 const rows=[];for(const raw of all.slice(start)){const bold=raw.startsWith('§');const l=raw.replace(/^§/,'').replace(/^\s*(\d{1,2}[.)]?|[-•*])\s+(?=[A-ZĂÂÎȘŞȚŢ])/,'');if(isStop(l)&&rows.some(r=>r.a))break;
 const a=splitAnchor(l);if(a&&/^\d{1,3}$/.test(a.left))a.left='';rows.push({t:a?a.left:l,a,bold});if(!a&&/^\d{1,3}$/.test(l))rows[rows.length-1].qtyOnly=parseInt(l)}
@@ -272,11 +273,11 @@ const anchors=rows.map((r,i)=>r.a?i:-1).filter(i=>i>=0);if(!anchors.length)retur
 const fa0=anchors[0],la0=anchors[anchors.length-1];const anyBold=rows.filter((r,i)=>r.bold&&r.t&&isTitle(r.t)&&i>=Math.max(0,fa0-4)&&i<=la0).length>=Math.ceil(anchors.length*0.6);const score=(r,dist)=>!r.t||!isTitle(r.t)?-99:(anyBold?(r.bold?6:-3):0)+(PRODKW.test(r.t)?3:0)+(guessCat(r.t)!=='Altele'?1:0)+(r.t.split(' ').length>=3?1:0)-dist*0.15;
 const titles=[];let lo=0;anchors.forEach((ai,k)=>{let best=-1,bs=-50;const hi=Math.min(rows.length-1,ai+(k+1<anchors.length?0:0));for(let j=Math.max(lo,0);j<=hi;j++){const sc=score(rows[j],ai-j)+(j===ai&&rows[j].t?2:0);if(sc>bs){bs=sc;best=j}}if(best<0)best=ai;titles.push(best);lo=best+1});
 const out=[];titles.forEach((ti,k)=>{const end=k+1<titles.length?titles[k+1]:rows.length;const a=rows[anchors[k]].a;const seg=rows.slice(ti,end);
-let name=rows[ti].t||'';const rest=seg.slice(1).map(r=>r.t).filter(Boolean);while(rest.length&&/^[a-zăâîșț][a-zăâîșț\s]{0,14}$/.test(rest[0]))name+=' '+rest.shift();
+let name=rows[ti].t||'';if(ti>0&&!rows[ti-1].a&&/^[A-Z][\w-]{2,}$/.test(rows[ti-1].t||''))name=rows[ti-1].t+' '+name;const rest=seg.slice(1).map(r=>r.t).filter(Boolean);while(rest.length&&/^[a-zăâîșț][a-zăâîșț\s]{0,14}$/.test(rest[0]))name+=' '+rest.shift();
 const parts=name.split(/,\s*/);name=parts.shift().trim();const specs=[];
 const nm=name.match(/\s(\d+(?:[.,]\d+)?)\s*("|”|″|inch|grupuri|grup|tăvi|tavi|locuri|posturi|motoare|module|litri|l|kg|kw|bar)\s*$/i);if(nm){const sp=parseSpec(name.slice(nm.index));if(sp)specs.push(sp);name=name.slice(0,nm.index).trim()}
-specs.push(...specsFrom([...parts,...rest]));for(let z=specs.length-1;z>=0;z--){if(specs.findIndex(x=>specTxt(x)===specTxt(specs[z]))<z)specs.splice(z,1)}const qo=seg.find(r=>r.qtyOnly);const qty=a.qty||(qo&&qo.qtyOnly)||1;
-if(!/[a-zăâîșț]{3}/i.test(name))return;const cat=guessCat(name);out.push({id:'x'+k,name:cap(name),cat,qty,val:a.val,cpv:CPV_BY[cat]||'',specs:specs.slice(0,8)})});
+specs.push(...specsFrom(parts,false),...specsFrom(rest));for(let z=specs.length-1;z>=0;z--){if(specs.findIndex(x=>specTxt(x)===specTxt(specs[z]))<z)specs.splice(z,1)}const qo=seg.find(r=>r.qtyOnly);const qty=a.qty||(qo&&qo.qtyOnly)||1;
+if(!/[a-zăâîșț]{3}/i.test(name))return;const cat=guessCat(name);out.push({id:'x'+k,name:cap(name),cat,qty,val:a.val,cur:a.cur,cpv:CPV_BY[cat]||'',specs:specs.slice(0,8)})});
 return out}
 
 const SUPD={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9'};
@@ -316,32 +317,33 @@ out+=rowsToText(tc.items.filter(it=>it.str&&it.str.trim()).map(it=>({x:it.transf
 const claudeUse=n=>(window.claude&&typeof window.claude.use==='function')?window.claude.use(n):Promise.resolve(null);
 async function aiExtract(text,images){const sample=await claudeUse('sample');if(!sample)return null;let imgs=[];if(images.length){try{const l=await sample.limits();if(l&&l.images)imgs=images.slice(0,4)}catch(e){}}if(!text&&!imgs.length)return null;
 const prompt=`Extragi lista de achiziții dintr-o ofertă de preț sau dintr-o decizie de finanțare depusă în programul Start-Up Nation (România). Ignoră salariile, chiria, utilitățile și alte cheltuieli care nu sunt echipamente sau servicii cumpărate de la un furnizor.
-Pentru fiecare poziție: name (denumirea scurtă, fără specificații), cat (unul din: HoReCa, IT, Mobilier, Beauty, Promovare, Altele), qty (număr), val (valoarea totală a poziției fără TVA, în lei, număr), cpv (cod CPV dacă apare, altfel ""), specs (specificațiile minime ca listă de [eticheta, valoare numerică sau null, unitate]; ex. ["Presiune",15,"bar"], ["Carcasă inox",null,""]). Nu inventa nimic ce nu apare.
-Răspunde doar cu JSON: {"items":[{"name":"","cat":"","qty":1,"val":0,"cpv":"","specs":[["",0,""]]}]}
+Pentru fiecare poziție: name (denumirea scurtă, fără specificații), cat (unul din: HoReCa, IT, Mobilier, Beauty, Promovare, Altele), qty (număr), val (valoarea totală a poziției fără TVA, în moneda ofertei, număr), cur ("RON" sau "EUR"), cpv (cod CPV dacă apare, altfel ""), specs (specificațiile minime ca listă de [eticheta, valoare numerică sau null, unitate]; ex. ["Presiune",15,"bar"], ["Carcasă inox",null,""]). Nu inventa nimic ce nu apare.
+Răspunde doar cu JSON: {"items":[{"name":"","cat":"","qty":1,"val":0,"cur":"RON","cpv":"","specs":[["",0,""]]}]}
 ${text?'Text:\n"""'+text.slice(0,12000)+'"""':'Documentul e în imaginile atașate.'}`;
 const r=await sample.json(prompt,{modelTier:'default',...(imgs.length?{images:imgs}:{})});
-const cats=['HoReCa','IT','Mobilier','Beauty','Promovare','Altele'];
-return (r&&Array.isArray(r.items)?r.items:[]).slice(0,40).map((x,i)=>({id:'ai'+i,name:cap(String(x.name||'Echipament')),cat:cats.includes(x.cat)?x.cat:guessCat(String(x.name||'')),qty:Math.max(1,Math.round(Number(x.qty)||1)),val:Math.max(0,Number(x.val)||0),cpv:/^\d{8}-\d$/.test(x.cpv||'')?x.cpv:'',specs:(Array.isArray(x.specs)?x.specs:[]).filter(a=>Array.isArray(a)&&a[0]).slice(0,6).map(([k,v,u])=>[cap(String(k)),v==null||v===''||isNaN(Number(v))?null:Number(v),String(u||'')])})).filter(x=>x.name)}
+const cats=['HoReCa','IT','Mobilier','Beauty','Energie verde','Promovare','Altele'];
+return (r&&Array.isArray(r.items)?r.items:[]).slice(0,40).map((x,i)=>({id:'ai'+i,name:cap(String(x.name||'Echipament')),cat:cats.includes(x.cat)?x.cat:guessCat(String(x.name||'')),qty:Math.max(1,Math.round(Number(x.qty)||1)),val:Math.max(0,Number(x.val)||0),cur:/eur/i.test(x.cur||'')?'EUR':'RON',cpv:/^\d{8}-\d$/.test(x.cpv||'')?x.cpv:'',specs:(Array.isArray(x.specs)?x.specs:[]).filter(a=>Array.isArray(a)&&a[0]).slice(0,6).map(([k,v,u])=>[cap(String(k)),v==null||v===''||isNaN(Number(v))?null:Number(v),String(u||'')])})).filter(x=>x.name)}
 
 const DAYS_LEFT=Math.max(0,Math.round((new Date('2027-12-08')-new Date('2026-11-21'))/864e5));
 
 function SpecAdder({onAdd}){const [v,setV]=useState('');const go=()=>{const t=v.trim();if(!t)return;const sp=parseSpec(t);if(sp)onAdd(sp);setV('')};
 return <div className="flex gap-1"><input value={v} onChange={e=>setV(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();go()}}} placeholder="ex. Volum minim 700 L" aria-label="Specificație nouă" className="min-h-[32px] w-full min-w-0 rounded-md border border-line px-2 text-sm focus:border-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-100"/><button type="button" onClick={go} aria-label="Adaugă specificația" className="grid h-8 w-8 shrink-0 place-items-center rounded-md ring-1 ring-line hover:bg-slate-50"><Plus className="h-4 w-4"/></button></div>}
-function ReviewList({items,setItems,raw,onConfirm}){
+function ReviewList({items,setItems,raw,onConfirm,rate,setRate}){const hasEur=items.some(x=>x.cur==='EUR');
 const upd=(i,patch)=>setItems(a=>a.map((x,j)=>j===i?{...x,...patch,warn:false}:x));
 const del=i=>setItems(a=>a.filter((_,j)=>j!==i));
 const add=()=>setItems(a=>[...a,{id:'n'+Date.now(),name:'',cat:'Altele',qty:1,val:0,cpv:'',specs:[]}]);
 const issues=it=>[!it.name||it.name.length<3?'denumire lipsă':null,!(it.val>0)?'valoare lipsă':null,!it.specs.length?'fără specificații':null,/^(buc|bucati|bucăți)\b/i.test(it.name)?'denumire suspectă':null].filter(Boolean);
 const total=items.reduce((a,x)=>a+(Number(x.val)||0),0);const nIss=items.filter(x=>issues(x).length).length;
-const cats=['HoReCa','IT','Mobilier','Beauty','Promovare','Altele'];
+const cats=['HoReCa','IT','Mobilier','Beauty','Energie verde','Promovare','Altele'];
 return <Card className="overflow-hidden">
 <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-4"><div><h3 className="font-semibold">2. Verifică lista extrasă</h3><p className="text-sm text-slate-500">Corectează denumirile, valorile și specificațiile minime, exact ca în oferta de la depunere. După confirmare, specificațiile se blochează în cererile de ofertă.</p></div>
-{nIss?<Badge tone="amber" icon={AlertTriangle}>{nIss} de verificat</Badge>:<Badge tone="emerald" icon={CheckCircle2}>Totul pare complet</Badge>}</div>
+<div className="flex flex-wrap items-center gap-3">{hasEur&&<label className="flex items-center gap-2 text-sm text-slate-600">Curs €<input type="number" step="0.0001" min="1" value={rate} onChange={e=>setRate(Number(e.target.value)||rate)} className="min-h-[36px] w-24 rounded-md border border-line px-2 num" aria-label="Curs EUR în lei"/><span className="text-xs text-slate-500">verifică cursul de la data ofertei</span></label>}{nIss?<Badge tone="amber" icon={AlertTriangle}>{nIss} de verificat</Badge>:<Badge tone="emerald" icon={CheckCircle2}>Totul pare complet</Badge>}</div></div>
 <ul className="divide-y divide-line">{items.map((it,i)=>{const iss=issues(it);return <li key={it.id} className={`grid gap-3 px-5 py-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.6fr)_auto] ${iss.length?'bg-amber-50/40':''}`}>
 <div className="space-y-2"><input value={it.name} onChange={e=>upd(i,{name:e.target.value})} aria-label="Denumire" placeholder="Denumirea echipamentului" className={`${inputCls} font-medium`}/>
 <div className="grid grid-cols-[1fr_64px_120px] gap-2"><select value={it.cat} onChange={e=>upd(i,{cat:e.target.value,cpv:CPV_BY[e.target.value]||''})} aria-label="Categorie" className={inputCls}>{cats.map(c=><option key={c}>{c}</option>)}</select>
 <input type="number" min="1" value={it.qty} onChange={e=>upd(i,{qty:Math.max(1,parseInt(e.target.value)||1)})} aria-label="Cantitate" className={`${inputCls} num px-2`}/>
-<div className="relative"><input type="number" min="0" value={it.val} onChange={e=>upd(i,{val:Number(e.target.value)||0})} aria-label="Valoare fără TVA" className={`${inputCls} num pr-9`}/><span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">lei</span></div></div>
+<div className="relative">{it.cur==='EUR'?<input type="number" min="0" step="0.01" value={it.valCur} onChange={e=>{const v=Number(e.target.value)||0;upd(i,{valCur:v,val:Math.round(v*rate*100)/100})}} aria-label="Valoare fără TVA" className={`${inputCls} num pr-9`}/>:<input type="number" min="0" value={it.val} onChange={e=>upd(i,{val:Number(e.target.value)||0})} aria-label="Valoare fără TVA" className={`${inputCls} num pr-9`}/>}<span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{it.cur==='EUR'?'€':'lei'}</span></div></div>
+{it.cur==='EUR'&&<p className="num text-xs text-slate-500">≈ {lei(it.val)} fără TVA, la cursul de {String(rate).replace('.',',')} lei/€</p>}
 {iss.length>0&&<p className="flex items-center gap-1.5 text-xs text-amber-700"><AlertTriangle className="h-3.5 w-3.5" aria-hidden="true"/>{iss.join(' · ')}</p>}</div>
 <div className="space-y-2"><p className="text-xs font-medium text-slate-500">Specificații minime</p><div className="flex flex-wrap gap-1.5">{it.specs.map((x,k)=><span key={k} className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-xs ring-1 ring-line">{specTxt(x)}<button type="button" onClick={()=>upd(i,{specs:it.specs.filter((_,z)=>z!==k)})} aria-label={`Șterge ${specTxt(x)}`} className="text-slate-400 hover:text-rose-600"><X className="h-3.5 w-3.5"/></button></span>)}{!it.specs.length&&<span className="text-xs text-slate-400">Nicio specificație încă</span>}</div>
 <SpecAdder onAdd={sp=>upd(i,{specs:[...it.specs,sp]})}/></div>
@@ -351,7 +353,7 @@ return <Card className="overflow-hidden">
 </Card>}
 
 function SunProject({toast,onRfq}){
-const [items,setItems]=useState(null);const [confirmed,setConfirmed]=useState(true);const loaded=!!items;const [files,setFiles]=useState([]);const [busy,setBusy]=useState(false);const [src,setSrc]=useState('');const [raw,setRaw]=useState('');const [err,setErr]=useState('');
+const [items,setItems]=useState(null);const [confirmed,setConfirmed]=useState(true);const [rate,setRate]=useState(5.09);const loaded=!!items;const [files,setFiles]=useState([]);const [busy,setBusy]=useState(false);const [src,setSrc]=useState('');const [raw,setRaw]=useState('');const [err,setErr]=useState('');
 const [st,setSt]=useState({});const [sel,setSel]=useState(null);const [plan,setPlan]=useState(null);const [extras,setExtras]=useState({});
 const LIST=items||[];const item=LIST.find(x=>x.id===sel);const s=sel?(st[sel]||{}):{};
 const set=(id,patch)=>setSt(o=>({...o,[id]:{...(o[id]||{}),...patch}}));
@@ -364,7 +366,7 @@ setRaw(text.replace(/^§/gm,'').replace(/ ?¦ ?/g,'   ').trim());let res=null,ho
 try{res=await aiExtract(text.replace(/^§/gm,'').replace(/ ?¦ ?/g,' | ').trim(),imgs);if(res&&res.length)how='asistentul AI'}catch(ex){res=null}
 if(!res||!res.length){res=heuristic(text);how='citire automată din PDF'}
 if(!res.length){setErr(imgs.length&&!text.trim()?'Pozele se citesc doar cu asistentul AI, disponibil în versiunea din Claude. Încarcă oferta în PDF.':text.trim()?'Am citit documentul, dar n-am găsit poziții cu cantitate și preț. Verifică dacă e oferta de la depunere sau folosește exemplul.':'Documentul nu conține text (e scanat). Încarcă PDF-ul original al ofertei sau o poză în versiunea din Claude.'+(skipped.length?` Fișiere neacceptate: ${skipped.join(', ')}.`:''));setBusy(false);return}
-setSel(null);setSt({});setSrc(how);setConfirmed(false);setItems(res);toast(`Am extras ${res.length} ${res.length===1?'poziție':'poziții'}. Verifică și corectează lista, apoi confirm-o.`)}
+setSel(null);setSt({});setSrc(how);setConfirmed(false);setItems(res.map(x=>x.cur==='EUR'?{...x,valCur:x.val,val:Math.round(x.val*rate*100)/100}:x));toast(`Am extras ${res.length} ${res.length===1?'poziție':'poziții'}. Verifică și corectează lista, apoi confirm-o.`)}
 catch(ex){setErr('Nu am putut citi fișierul: '+(ex&&ex.message||'eroare necunoscută')+'. Încearcă alt PDF sau folosește exemplul.')}
 setBusy(false);if(e.target&&e.target.value!==undefined)e.target.value=''}
 const steps=it=>{const x=st[it.id]||{};const single=it.val<1000;return [
@@ -399,7 +401,7 @@ return <div className="fade-in space-y-6">
 {raw&&<details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer font-medium">Textul citit din document</summary><pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-lg bg-ground p-3 ring-1 ring-line">{raw.slice(0,6000)}</pre></details>}
 </Card>
 
-{loaded&&!confirmed&&<ReviewList items={items} setItems={setItems} raw={raw} onConfirm={()=>{setConfirmed(true);toast('Lista a fost confirmată. Specificațiile minime sunt acum blocate pentru cererile de ofertă.')}}/>}
+{loaded&&!confirmed&&<ReviewList items={items} setItems={setItems} raw={raw} rate={rate} setRate={r=>{setRate(r);setItems(a=>a.map(x=>x.cur==='EUR'?{...x,val:Math.round((x.valCur||0)*r*100)/100}:x))}} onConfirm={()=>{setConfirmed(true);toast('Lista a fost confirmată. Specificațiile minime sunt acum blocate pentru cererile de ofertă.')}}/>}
 {loaded&&confirmed&&<Card className="overflow-hidden">
 <div className="flex flex-wrap items-end justify-between gap-2 border-b border-line px-5 py-4"><div><h3 className="font-semibold">2. Lista de achiziții aprobată</h3><p className="text-sm text-slate-500">{LIST.length} poziții, {lei(total)} fără TVA, extrase cu {src}. Vezi gratuit câți furnizori verificați sunt pentru fiecare echipament. Trimiterea cererilor și documentele sunt incluse în pachet.</p></div><Badge tone="navy" icon={Lock}>Preluat din oferta de la depunere</Badge></div>
 <table className="w-full text-sm"><thead className="hidden bg-ground text-left text-xs font-medium text-slate-500 md:table-header-group"><tr><th className="px-5 py-2.5">Achiziție</th><th className="px-5 py-2.5">Specificații minime</th><th className="px-5 py-2.5 text-right">Valoare aprobată</th><th className="px-5 py-2.5">Furnizori</th><th className="px-5 py-2.5">Dosar</th><th className="px-5 py-2.5"><span className="sr-only">Acțiune</span></th></tr></thead>
