@@ -618,7 +618,9 @@ async function resolveNames(){if(!usr)return;const ids=[...new Set(offersAll().m
 function introAnim(){if(!G){intro=false;return}
 const onCat=!$('v-catalog').hidden;
 if(onCat){G.set('#iso',{'--s':.55,'--rx':'0deg','--rz':'0deg'});
-G.timeline({onComplete:()=>{intro=false}})
+const tl=G.timeline({onComplete:()=>{intro=false}});
+setTimeout(()=>{if(tl.progress()<1){G.globalTimeline.getChildren(false,true,true).forEach(x=>{if(!x.scrollTrigger)x.progress(1)});intro=false}},4500);
+tl
 .from('.brand',{y:-20,autoAlpha:0,duration:.5})
 .from('nav a',{y:30,autoAlpha:0,stagger:.06,duration:.5,ease:'back.out(1.8)',clearProps:'transform,visibility'},'<0.1')
 .from('.lead h1',{y:50,autoAlpha:0,duration:.8},'<0.15')
