@@ -241,34 +241,45 @@ return {name,price:Math.round(it.val*f[i]/10)*10,days:[7,10,5][i],war:[24,12,36]
 /* ---- extragerea achizițiilor din documentele încărcate ---- */
 const cap=t=>t?t.charAt(0).toUpperCase()+t.slice(1):t;
 const toNum=x=>{let t=String(x).replace(/\s/g,'');if(/,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.');else if(/\.\d{3}$/.test(t)||/\.\d{3}\./.test(t))t=t.replace(/\./g,'');else t=t.replace(',','.');return parseFloat(t)};
-const CATKW=[['HoReCa',/espres|cafe|râșni|rasni|frigid|congel|cuptor|vitrin|vase|plit|hot[ăa]|blender|mixer|patiser|bucăt|bucat|gastro|răcitor|racitor|cafetier/i],['Beauty',/coafor|cosmetic|manichiur|pedichiur|spălător|spalator|unghii|epila/i],['IT',/laptop|calculator|\bpc\b|desktop|monitor|imprimant|multifunc|\bpos\b|marcat|tablet|telefon|server|router|software|licen[țt]|\bsite\b|magazin online/i],['Mobilier',/mobil|\bmas[ăa]\b|mese|scaun|birou|dulap|raft|canapea|fotoliu|recep[țt]/i],['Promovare',/plăcu[țt]|placut|afi[șs]|banner|autocolant/i]];
+const CATKW=[['HoReCa',/malaxor|dospitor|feliator|laminor|friteuz|gr[ăa]tar|abator|cutter|espres|cafe|râșni|rasni|frigid|congel|cuptor|vitrin|vase|plit|hot[ăa]|blender|mixer|patiser|bucăt|bucat|gastro|răcitor|racitor|cafetier/i],['Beauty',/coafor|cosmetic|manichiur|pedichiur|spălător|spalator|unghii|epila/i],['IT',/laptop|calculator|\bpc\b|desktop|monitor|imprimant|multifunc|\bpos\b|marcat|tablet|telefon|server|router|software|licen[țt]|\bsite\b|magazin online/i],['Mobilier',/mobil|\bmas[ăa]\b|mese|scaun|birou|dulap|raft|canapea|fotoliu|recep[țt]/i],['Promovare',/plăcu[țt]|placut|afi[șs]|banner|autocolant/i]];
 const CPV_BY={HoReCa:'39221000-7',IT:'30200000-1',Mobilier:'39100000-3',Beauty:'',Promovare:'',Altele:''};
 const guessCat=n=>{for(const [c,re] of CATKW)if(re.test(n))return c;return 'Altele'};
 const COUNTU=['grupuri','grup','tăvi','tavi','locuri','posturi','motoare','module','arzătoare','arzatoare','sertare','porturi','uși','usi'];
 const SPEC_RE=/(\d+(?:[.,]\d+)?)\s*(°|"|”|″|inch|bar|litri|l\b|gb|tb|kw|w\b|cm|mm|kg|grupuri|grup|tăvi|tavi|locuri|posturi|motoare|module|arzătoare|sertare|porturi)?/i;
-function parseSpec(seg){const t=seg.trim().replace(/^(și|si|cu)\s+/i,'').replace(/[.;]+$/,'');if(!t)return null;const m=t.match(SPEC_RE);
+function parseSpec(seg){const t=seg.trim().replace(/^(și|si|cu)\s+/i,'').replace(/[.;]+$/,'');if(!t)return null;
+const ci=t.indexOf(':');if(ci>0&&ci<40){const lab=cap(t.slice(0,ci).trim());const rest=t.slice(ci+1).trim();const mm=rest.match(/^(?:min\.?|minim|minimum)?\s*(\d+(?:[.,]\d+)?)\s*(°c?|"|”|inch|bar|litri|l|gb|tb|kw|w|cm|mm|kg|v|a)?\.?$/i);if(mm){let u=(mm[2]||'');u={litri:'L',l:'L',inch:'"','”':'"',gb:'GB',tb:'TB',kw:'kW',w:'W',kg:'kg',v:'V',a:'A','°c':'°C'}[u.toLowerCase()]||u;return [lab,toNum(mm[1]),u]}return rest?[`${lab}: ${rest}`,null,'']:null}const m=t.match(SPEC_RE);
 if(!m)return [cap(t),null,''];const v=toNum(m[1]);let u=(m[2]||'').toLowerCase();u={litri:'L',l:'L',inch:'"','”':'"','″':'"',gb:'GB',tb:'TB',kw:'kW',w:'W'}[u]||u;
 let label=t.replace(m[0],' ').replace(/\b(min|minim|minimum|maxim|max)\b\.?|cel pu[țt]in/gi,' ').replace(/[:≥>=]/g,' ').replace(/\s+/g,' ').trim();
 if(COUNTU.includes(u)){label=(cap(u==='grup'?'grupuri':u)+' '+label).trim();u=''}
-label=cap(label||({'"':'Ecran',L:'Volum',GB:'Capacitate',kW:'Putere',bar:'Presiune',cm:'Dimensiune'}[u]||'Valoare'));return [label,v,u]}
-function heuristic(text){const lines=text.split(/\n+/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
-const AMT=/(\d{1,3}(?:[.\s]\d{3})+(?:,\d{1,2})?|\d+(?:,\d{1,2})?)\s*(?:lei|ron)/gi;
-let cand=lines.filter(l=>/(\d\s*(buc|bucăți|bucati|set|seturi|pachet)\b|\b(buc|bucăți|bucati|set)\.?\s+\d)/i.test(l)&&/\d[.,]?\d*\s*(lei|ron)?\s*$|lei|ron/i.test(l));
-if(!cand.length)cand=lines.filter(l=>/lei|ron/i.test(l)&&/^\s*(\d+[.)]|[-•*])/.test(l));
-const out=[];cand.forEach((l,i)=>{if(/^(total|subtotal|tva|valoare total)/i.test(l))return;
-let amounts=[...l.matchAll(AMT)].map(m=>toNum(m[1]));let val=amounts.length?amounts[amounts.length-1]:NaN;
-if(isNaN(val)){const tail=l.match(/(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2})\s*$/);if(tail)val=toNum(tail[1])}
-const q=l.match(/(\d+)\s*(?:buc|bucăți|bucati|set|seturi|pachet)\b/i)||l.match(/\b(?:buc|bucăți|bucati|set)\.?\s+(\d+)/i);const qty=q?parseInt(q[1]):1;
-let desc=l.replace(/^\s*(\d+[.)]?|[-•*])\s+/,'').split(/\s[–—-]\s|\s\|\s/)[0];desc=desc.replace(/\s*\d+\s*(buc|bucăți|bucati)\b.*$/i,'').replace(/\s+(buc|bucăți|bucati|set)\.?\s+\d.*$/i,'').trim();
-const parts=desc.split(/,\s*/);let name=parts.shift();const specs=[];
-const nm=name.match(/\s(\d+(?:[.,]\d+)?)\s*("|”|″|inch|grupuri|grup|tăvi|tavi|locuri|posturi|motoare|module|litri|l|kw|bar)\s*$/i);
-if(nm){const sp=parseSpec(name.slice(nm.index));if(sp)specs.push(sp);name=name.slice(0,nm.index).trim()}
-parts.forEach(p=>{const sp=parseSpec(p);if(sp)specs.push(sp)});
-if(!name||name.length<3||isNaN(val))return;const cat=guessCat(name);
-out.push({id:'x'+i,name:cap(name),cat,qty,val,cpv:CPV_BY[cat]||'',specs})});return out}
+label=cap(label||({'"':'Ecran',L:'Volum',GB:'Capacitate',kW:'Putere',bar:'Presiune',cm:'Dimensiune',kg:'Capacitate'}[u]||'Valoare'));return [label,v,u]}
+const AMT_RE=/(\d{1,3}(?:[.\s]\d{3})+(?:,\d{1,2})?|\d+,\d{1,2}|\d+)\s*(?:lei|ron)\b|(\d{1,3}(?:\.\d{3})+(?:,\d{2})?|\d+,\d{2})(?!\s*(?:%|mm|cm|kg|l\b|kw))/gi;
+const QTY_RE=/(\d+)\s*(?:buc(?:ăți|ati|\.)?|bucata|bucată|set(?:uri)?|pachet|pcs)\b/i,QTY_RE2=/\b(?:buc(?:ăți|ati|\.)?|bucata|bucată|set)\s+(\d+)\b(?![.,]\d)/i;
+const PRODKW=/(frigid|congel|cuptor|malaxor|dospitor|feliator|laminor|mixer|robot|cutter|friteuz|gr[ăa]tar|plit[ăa]|aparat|ma[șs]in[ăa]|sistem|echipament|utilaj|dulap|vitrin|espres|r[âa]șni|rasni|mas[ăa]\b|mese|scaun|birou|raft|laptop|calculator|monitor|imprimant|multifunc|tablet|telefon|server|software|licen|site|pat\b|sp[ăa]l[ăa]tor|fotoliu|canapea|hot[ăa]|blender|storc|fierb|abator|cântar|cantar|balan|frez|strung|compresor|generator|panou|invertor|baterie|autoturism|autoutilitar|drona|camer[ăa]|proiector|boxe|lamp|corp de iluminat|instala[țt]ie)/i;
+const isTitle=l=>/^[A-ZĂÂÎȘŞȚŢ0-9]/.test(l)&&!/^[^:]{0,30}:\s/.test(l)&&!/^[-–•*·]/.test(l)&&l.split(/\s+/).length>=2&&!/^(buc|bucati|bucăți)\b/i.test(l);
+const isStop=l=>/^(total|subtotal|tva|valoare total|termen|valabilitate|modalitate|condi[țt]ii|plata|livrare|garan[țt]ie general|cu stim|semn[ăa]tur|ofert[ăa] valabil)/i.test(l);
+function amountsIn(l){return [...l.matchAll(AMT_RE)].map(m=>toNum(m[1]||m[2])).filter(n=>!isNaN(n)&&n>0)}
+function specsFrom(lines){const out=[];lines.forEach(l=>{l.replace(/^[-–•*·]\s*/,'').split(/;\s*|,\s+(?=[A-ZĂÂÎȘȚa-zăâîșț]+[^,]*[:\d])/).forEach(seg=>{const t=seg.trim().replace(/[–—-]\s*$/,'').trim();if(t.length<2||t.length>90)return;const sp=parseSpec(t);if(sp)out.push(sp)})});return out.slice(0,8)}
+function splitAnchor(l){const am=amountsIn(l);if(!am.length)return null;const q=l.match(QTY_RE)||l.match(QTY_RE2);if(!(q||am.length>=2||/lei|ron/i.test(l)))return null;
+let cut=l.length;if(q)cut=Math.min(cut,l.indexOf(q[0]));const fa=l.search(/\d[\d.,\s]*\s*(lei|ron)\b|\d{1,3}(\.\d{3})+(,\d{2})?|\d+,\d{2}/i);if(fa>=0)cut=Math.min(cut,fa);
+const left=l.slice(0,cut).replace(/\s+\d{1,3}\s*$/,'').replace(/\b(buc(ăți|ati)?|bucata|um)\.?\s*$/i,'').replace(/[–—-]\s*$/,'').trim();
+return {qty:q?parseInt(q[1]):null,val:am[am.length-1],left}}
+function heuristic(text){const all=text.split(/\n+/).map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
+let start=all.findIndex(l=>/(produs|denumire|descriere|articol)/i.test(l.replace(/^§/,''))&&/(buc|cant|pre[țt]|total|valoare|\bum\b)/i.test(l));start=start>=0?start+1:0;
+const rows=[];for(const raw of all.slice(start)){const bold=raw.startsWith('§');const l=raw.replace(/^§/,'').replace(/^\s*(\d{1,2}[.)]?|[-•*])\s+(?=[A-ZĂÂÎȘŞȚŢ])/,'');if(isStop(l)&&rows.some(r=>r.a))break;
+const a=splitAnchor(l);if(a&&/^\d{1,3}$/.test(a.left))a.left='';rows.push({t:a?a.left:l,a,bold});if(!a&&/^\d{1,3}$/.test(l))rows[rows.length-1].qtyOnly=parseInt(l)}
+const anchors=rows.map((r,i)=>r.a?i:-1).filter(i=>i>=0);if(!anchors.length)return [];
+const fa0=anchors[0],la0=anchors[anchors.length-1];const anyBold=rows.filter((r,i)=>r.bold&&r.t&&isTitle(r.t)&&i>=Math.max(0,fa0-4)&&i<=la0).length>=Math.ceil(anchors.length*0.6);const score=(r,dist)=>!r.t||!isTitle(r.t)?-99:(anyBold?(r.bold?6:-3):0)+(PRODKW.test(r.t)?3:0)+(guessCat(r.t)!=='Altele'?1:0)+(r.t.split(' ').length>=3?1:0)-dist*0.15;
+const titles=[];let lo=0;anchors.forEach((ai,k)=>{let best=-1,bs=-50;const hi=Math.min(rows.length-1,ai+(k+1<anchors.length?0:0));for(let j=Math.max(lo,0);j<=hi;j++){const sc=score(rows[j],ai-j)+(j===ai&&rows[j].t?2:0);if(sc>bs){bs=sc;best=j}}if(best<0)best=ai;titles.push(best);lo=best+1});
+const out=[];titles.forEach((ti,k)=>{const end=k+1<titles.length?titles[k+1]:rows.length;const a=rows[anchors[k]].a;const seg=rows.slice(ti,end);
+let name=rows[ti].t||'';const rest=seg.slice(1).map(r=>r.t).filter(Boolean);while(rest.length&&/^[a-zăâîșț][a-zăâîșț\s]{0,14}$/.test(rest[0]))name+=' '+rest.shift();
+const parts=name.split(/,\s*/);name=parts.shift().trim();const specs=[];
+const nm=name.match(/\s(\d+(?:[.,]\d+)?)\s*("|”|″|inch|grupuri|grup|tăvi|tavi|locuri|posturi|motoare|module|litri|l|kg|kw|bar)\s*$/i);if(nm){const sp=parseSpec(name.slice(nm.index));if(sp)specs.push(sp);name=name.slice(0,nm.index).trim()}
+specs.push(...specsFrom([...parts,...rest]));for(let z=specs.length-1;z>=0;z--){if(specs.findIndex(x=>specTxt(x)===specTxt(specs[z]))<z)specs.splice(z,1)}const qo=seg.find(r=>r.qtyOnly);const qty=a.qty||(qo&&qo.qtyOnly)||1;
+if(!/[a-zăâîșț]{3}/i.test(name))return;const cat=guessCat(name);out.push({id:'x'+k,name:cap(name),cat,qty,val:a.val,cpv:CPV_BY[cat]||'',specs:specs.slice(0,8)})});
+return out}
 async function pdfText(file){const lib=window.pdfjsLib;if(!lib)throw new Error('Cititorul de PDF nu s-a încărcat.');const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;let out='';
-for(let i=1;i<=Math.min(doc.numPages,25);i++){const pg=await doc.getPage(i);const tc=await pg.getTextContent();const rows={};tc.items.forEach(it=>{if(!it.str)return;const y=Math.round(it.transform[5]/3);(rows[y]=rows[y]||[]).push([it.transform[4],it.str])});
-out+=Object.keys(rows).sort((a,b)=>b-a).map(y=>rows[y].sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join(' ').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n')+'\n'}return out}
+for(let i=1;i<=Math.min(doc.numPages,25);i++){const pg=await doc.getPage(i);try{await pg.getOperatorList()}catch(e){}const tc=await pg.getTextContent();const isB=fn=>{try{const f=pg.commonObjs.has(fn)?pg.commonObjs.get(fn):null;return !!f&&(/bold|black|heavy|semibold|demi/i.test(f.name||'')||f.bold)}catch(e){return false}};const rows={};tc.items.forEach(it=>{if(!it.str||!it.str.trim())return;const y=Math.round(it.transform[5]/3);(rows[y]=rows[y]||[]).push([it.transform[4],it.str,isB(it.fontName)])});
+out+=Object.keys(rows).sort((a,b)=>b-a).map(y=>{const r=rows[y].sort((a,b)=>a[0]-b[0]);const t=r.map(x=>x[1]).join(' ').replace(/\s+/g,' ').trim();return t?(r[0][2]?'§':'')+t:''}).filter(Boolean).join('\n')+'\n'}return out}
 const claudeUse=n=>(window.claude&&typeof window.claude.use==='function')?window.claude.use(n):Promise.resolve(null);
 async function aiExtract(text,images){const sample=await claudeUse('sample');if(!sample)return null;let imgs=[];if(images.length){try{const l=await sample.limits();if(l&&l.images)imgs=images.slice(0,4)}catch(e){}}if(!text&&!imgs.length)return null;
 const prompt=`Extragi lista de achiziții dintr-o ofertă de preț sau dintr-o decizie de finanțare depusă în programul Start-Up Nation (România). Ignoră salariile, chiria, utilitățile și alte cheltuieli care nu sunt echipamente sau servicii cumpărate de la un furnizor.
@@ -281,21 +292,46 @@ return (r&&Array.isArray(r.items)?r.items:[]).slice(0,40).map((x,i)=>({id:'ai'+i
 
 const DAYS_LEFT=Math.max(0,Math.round((new Date('2027-12-08')-new Date('2026-11-21'))/864e5));
 
+function SpecAdder({onAdd}){const [v,setV]=useState('');const go=()=>{const t=v.trim();if(!t)return;const sp=parseSpec(t);if(sp)onAdd(sp);setV('')};
+return <div className="flex gap-1"><input value={v} onChange={e=>setV(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();go()}}} placeholder="ex. Volum minim 700 L" aria-label="Specificație nouă" className="min-h-[32px] w-full min-w-0 rounded-md border border-line px-2 text-sm focus:border-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-100"/><button type="button" onClick={go} aria-label="Adaugă specificația" className="grid h-8 w-8 shrink-0 place-items-center rounded-md ring-1 ring-line hover:bg-slate-50"><Plus className="h-4 w-4"/></button></div>}
+function ReviewList({items,setItems,raw,onConfirm}){
+const upd=(i,patch)=>setItems(a=>a.map((x,j)=>j===i?{...x,...patch,warn:false}:x));
+const del=i=>setItems(a=>a.filter((_,j)=>j!==i));
+const add=()=>setItems(a=>[...a,{id:'n'+Date.now(),name:'',cat:'Altele',qty:1,val:0,cpv:'',specs:[]}]);
+const issues=it=>[!it.name||it.name.length<3?'denumire lipsă':null,!(it.val>0)?'valoare lipsă':null,!it.specs.length?'fără specificații':null,/^(buc|bucati|bucăți)\b/i.test(it.name)?'denumire suspectă':null].filter(Boolean);
+const total=items.reduce((a,x)=>a+(Number(x.val)||0),0);const nIss=items.filter(x=>issues(x).length).length;
+const cats=['HoReCa','IT','Mobilier','Beauty','Promovare','Altele'];
+return <Card className="overflow-hidden">
+<div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-4"><div><h3 className="font-semibold">2. Verifică lista extrasă</h3><p className="text-sm text-slate-500">Corectează denumirile, valorile și specificațiile minime, exact ca în oferta de la depunere. După confirmare, specificațiile se blochează în cererile de ofertă.</p></div>
+{nIss?<Badge tone="amber" icon={AlertTriangle}>{nIss} de verificat</Badge>:<Badge tone="emerald" icon={CheckCircle2}>Totul pare complet</Badge>}</div>
+<ul className="divide-y divide-line">{items.map((it,i)=>{const iss=issues(it);return <li key={it.id} className={`grid gap-3 px-5 py-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.6fr)_auto] ${iss.length?'bg-amber-50/40':''}`}>
+<div className="space-y-2"><input value={it.name} onChange={e=>upd(i,{name:e.target.value})} aria-label="Denumire" placeholder="Denumirea echipamentului" className={`${inputCls} font-medium`}/>
+<div className="grid grid-cols-[1fr_64px_120px] gap-2"><select value={it.cat} onChange={e=>upd(i,{cat:e.target.value,cpv:CPV_BY[e.target.value]||''})} aria-label="Categorie" className={inputCls}>{cats.map(c=><option key={c}>{c}</option>)}</select>
+<input type="number" min="1" value={it.qty} onChange={e=>upd(i,{qty:Math.max(1,parseInt(e.target.value)||1)})} aria-label="Cantitate" className={`${inputCls} num px-2`}/>
+<div className="relative"><input type="number" min="0" value={it.val} onChange={e=>upd(i,{val:Number(e.target.value)||0})} aria-label="Valoare fără TVA" className={`${inputCls} num pr-9`}/><span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">lei</span></div></div>
+{iss.length>0&&<p className="flex items-center gap-1.5 text-xs text-amber-700"><AlertTriangle className="h-3.5 w-3.5" aria-hidden="true"/>{iss.join(' · ')}</p>}</div>
+<div className="space-y-2"><p className="text-xs font-medium text-slate-500">Specificații minime</p><div className="flex flex-wrap gap-1.5">{it.specs.map((x,k)=><span key={k} className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-xs ring-1 ring-line">{specTxt(x)}<button type="button" onClick={()=>upd(i,{specs:it.specs.filter((_,z)=>z!==k)})} aria-label={`Șterge ${specTxt(x)}`} className="text-slate-400 hover:text-rose-600"><X className="h-3.5 w-3.5"/></button></span>)}{!it.specs.length&&<span className="text-xs text-slate-400">Nicio specificație încă</span>}</div>
+<SpecAdder onAdd={sp=>upd(i,{specs:[...it.specs,sp]})}/></div>
+<div className="flex items-start justify-end"><button type="button" onClick={()=>del(i)} aria-label={`Șterge ${it.name||'poziția'}`} className="grid h-10 w-10 place-items-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600"><X className="h-5 w-5"/></button></div></li>})}</ul>
+<div className="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-ground px-5 py-4"><div className="flex flex-wrap items-center gap-3"><Btn variant="ghost" onClick={add}><Plus className="h-4 w-4" aria-hidden="true"/>Adaugă poziție</Btn><span className="num text-sm text-slate-600">{items.length} poziții · {lei(total)} fără TVA</span></div>
+<Btn onClick={onConfirm} disabled={!items.length||items.some(x=>!x.name||!(x.val>0))}><CheckCircle2 className="h-4 w-4" aria-hidden="true"/>Confirm lista</Btn></div>
+</Card>}
+
 function SunProject({toast,onRfq}){
-const [items,setItems]=useState(null);const loaded=!!items;const [files,setFiles]=useState([]);const [busy,setBusy]=useState(false);const [src,setSrc]=useState('');const [raw,setRaw]=useState('');const [err,setErr]=useState('');
+const [items,setItems]=useState(null);const [confirmed,setConfirmed]=useState(true);const loaded=!!items;const [files,setFiles]=useState([]);const [busy,setBusy]=useState(false);const [src,setSrc]=useState('');const [raw,setRaw]=useState('');const [err,setErr]=useState('');
 const [st,setSt]=useState({});const [sel,setSel]=useState(null);const [plan,setPlan]=useState(null);const [extras,setExtras]=useState({});
 const LIST=items||[];const item=LIST.find(x=>x.id===sel);const s=sel?(st[sel]||{}):{};
 const set=(id,patch)=>setSt(o=>({...o,[id]:{...(o[id]||{}),...patch}}));
 const total=LIST.reduce((a,x)=>a+x.val,0);
-function load(){setErr('');setBusy(true);setTimeout(()=>{setBusy(false);setFiles([]);setRaw('');setSrc('exemplul încorporat');setSel(null);setSt({});setItems(SUN_BASE);toast(`Am extras ${SUN_BASE.length} achiziții și specificațiile minime din oferta de la depunere.`)},700)}
+function load(){setErr('');setBusy(true);setTimeout(()=>{setBusy(false);setFiles([]);setRaw('');setSrc('exemplul încorporat');setSel(null);setSt({});setConfirmed(true);setItems(SUN_BASE);toast(`Am extras ${SUN_BASE.length} achiziții și specificațiile minime din oferta de la depunere.`)},700)}
 async function onFiles(e){const fl=[...(e.target.files||e.dataTransfer?.files||[])];if(!fl.length)return;setFiles(fl.map(f=>f.name));setErr('');setBusy(true);
 try{let text='';const imgs=[];const skipped=[];
 for(const f of fl){if(f.type==='application/pdf'||/\.pdf$/i.test(f.name))text+='\n'+await pdfText(f);else if(f.type.startsWith('image/'))imgs.push(f);else if(/\.(txt|csv)$/i.test(f.name))text+='\n'+await f.text();else skipped.push(f.name)}
-setRaw(text.trim());let res=null,how='';
-try{res=await aiExtract(text.trim(),imgs);if(res&&res.length)how='asistentul AI'}catch(ex){res=null}
+setRaw(text.replace(/^§/gm,'').trim());let res=null,how='';
+try{res=await aiExtract(text.replace(/^§/gm,'').trim(),imgs);if(res&&res.length)how='asistentul AI'}catch(ex){res=null}
 if(!res||!res.length){res=heuristic(text);how='citire automată din PDF'}
 if(!res.length){setErr(imgs.length&&!text.trim()?'Pozele se citesc doar cu asistentul AI, disponibil în versiunea din Claude. Încarcă oferta în PDF.':text.trim()?'Am citit documentul, dar n-am găsit poziții cu cantitate și preț. Verifică dacă e oferta de la depunere sau folosește exemplul.':'Documentul nu conține text (e scanat). Încarcă PDF-ul original al ofertei sau o poză în versiunea din Claude.'+(skipped.length?` Fișiere neacceptate: ${skipped.join(', ')}.`:''));setBusy(false);return}
-setSel(null);setSt({});setSrc(how);setItems(res);toast(`Am extras ${res.length} ${res.length===1?'achiziție':'achiziții'} din ${fl.length===1?'document':'documente'}. Verifică lista.`)}
+setSel(null);setSt({});setSrc(how);setConfirmed(false);setItems(res);toast(`Am extras ${res.length} ${res.length===1?'poziție':'poziții'}. Verifică și corectează lista, apoi confirm-o.`)}
 catch(ex){setErr('Nu am putut citi fișierul: '+(ex&&ex.message||'eroare necunoscută')+'. Încearcă alt PDF sau folosește exemplul.')}
 setBusy(false);if(e.target&&e.target.value!==undefined)e.target.value=''}
 const steps=it=>{const x=st[it.id]||{};const single=it.val<1000;return [
@@ -330,7 +366,8 @@ return <div className="fade-in space-y-6">
 {raw&&<details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer font-medium">Textul citit din document</summary><pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-lg bg-ground p-3 ring-1 ring-line">{raw.slice(0,6000)}</pre></details>}
 </Card>
 
-{loaded&&<Card className="overflow-hidden">
+{loaded&&!confirmed&&<ReviewList items={items} setItems={setItems} raw={raw} onConfirm={()=>{setConfirmed(true);toast('Lista a fost confirmată. Specificațiile minime sunt acum blocate pentru cererile de ofertă.')}}/>}
+{loaded&&confirmed&&<Card className="overflow-hidden">
 <div className="flex flex-wrap items-end justify-between gap-2 border-b border-line px-5 py-4"><div><h3 className="font-semibold">2. Lista de achiziții aprobată</h3><p className="text-sm text-slate-500">{LIST.length} poziții, {lei(total)} fără TVA, extrase cu {src}. Vezi gratuit câți furnizori verificați sunt pentru fiecare echipament. Trimiterea cererilor și documentele sunt incluse în pachet.</p></div><Badge tone="navy" icon={Lock}>Preluat din oferta de la depunere</Badge></div>
 <table className="w-full text-sm"><thead className="hidden bg-ground text-left text-xs font-medium text-slate-500 md:table-header-group"><tr><th className="px-5 py-2.5">Achiziție</th><th className="px-5 py-2.5">Specificații minime</th><th className="px-5 py-2.5 text-right">Valoare aprobată</th><th className="px-5 py-2.5">Furnizori</th><th className="px-5 py-2.5">Dosar</th><th className="px-5 py-2.5"><span className="sr-only">Acțiune</span></th></tr></thead>
 <tbody className="divide-y divide-line">{LIST.map(it=>{const [lab,tone]=status(it);return <tr key={it.id} className={`grid grid-cols-2 gap-x-4 gap-y-2 px-5 py-4 md:table-row md:p-0 ${sel===it.id?'bg-navy-50/50':''}`}>
@@ -341,7 +378,7 @@ return <div className="fade-in space-y-6">
 <td className="text-right md:px-5 md:py-3.5 md:text-left"><Badge tone={tone}>{lab}</Badge></td>
 <td className="col-span-2 md:px-5 md:py-3.5 md:text-right"><Btn variant={sel===it.id?'navy':'ghost'} className="w-full px-3 md:w-auto" onClick={()=>{setSel(it.id);setTimeout(()=>document.getElementById('dosar')?.scrollIntoView({behavior:'smooth',block:'start'}),50)}}>{done(it)?'Deschide dosarul':'Pornește achiziția'}<ChevronRight className="h-4 w-4" aria-hidden="true"/></Btn></td></tr>})}</tbody></table></Card>}
 
-{loaded&&item&&<div id="dosar" className="grid scroll-mt-24 gap-6 lg:grid-cols-[1.5fr_1fr]">
+{loaded&&confirmed&&item&&<div id="dosar" className="grid scroll-mt-24 gap-6 lg:grid-cols-[1.5fr_1fr]">
 <Card className="p-5">
 <div className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="font-semibold">3. Dosar de achiziție: {item.name}</h3><p className="text-sm text-slate-500">Valoare aprobată {lei(item.val)} · CPV {item.cpv||'opțional'}</p></div>{plan||item.val<1000?null:<Badge tone="amber" icon={Lock}>Necesită pachet</Badge>}</div>
 
