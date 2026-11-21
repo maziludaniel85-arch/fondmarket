@@ -34,11 +34,11 @@ body{font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased}
 <script type="text/babel" data-presets="react">
 const {useState,useMemo,useEffect,useRef}=React;
 const I=window.LucideReact;
-const {ShieldCheck,BadgeCheck,Building2,Landmark,FileText,Send,Star,Search,Filter,Briefcase,ArrowRight,Sparkles,Clock,Trophy,Inbox,LayoutDashboard,Plus,ChevronRight,CheckCircle2,MapPin,Users,Store,Bell,Eye,TrendingUp,Hourglass,Tag,Wallet,FolderKanban,X,Upload,Lock,FileCheck,Download,AlertTriangle,CalendarClock,Package,ListChecks,Scale,Paperclip,CircleDashed,Mail}=I;
+const {ShieldCheck,BadgeCheck,Building2,Landmark,FileText,Send,Star,Search,Filter,Briefcase,ArrowRight,Sparkles,Clock,Trophy,Inbox,LayoutDashboard,Plus,ChevronRight,CheckCircle2,MapPin,Users,Store,Bell,Eye,TrendingUp,Hourglass,Tag,Wallet,FolderKanban,X,Upload,Lock,FileCheck,Download,AlertTriangle,CalendarClock,Package,ListChecks,Scale,Paperclip,CircleDashed,Mail,Rocket,ShoppingCart,Calculator,Coffee,Scissors,Laptop,Car,Sofa,Printer,Globe,Wrench,Minus,Gift}=I;
 
 const PROGRAMS=['PNRR','Fonduri Europene','Start-Up Nation','Programe regionale'];
 const PCOLOR={'PNRR':'bg-navy-50 text-navy-700 ring-navy-100','Fonduri Europene':'bg-sky-50 text-sky-700 ring-sky-100','Start-Up Nation':'bg-violet-50 text-violet-700 ring-violet-100','Programe regionale':'bg-amber-50 text-amber-700 ring-amber-100'};
-const DOMAINS=['Echipamente IT','Software','Servicii IT','Mobilier','Energie verde','Consultanță','Echipamente medicale'];
+const DOMAINS=['Echipamente HoReCa','Echipamente IT','Software','Servicii IT','Mobilier','Energie verde','Consultanță','Echipamente medicale'];
 const CPV=[['30213100-6','Calculatoare portabile','Echipamente IT'],['48000000-8','Pachete software','Software'],['72000000-5','Servicii IT','Servicii IT'],['39130000-2','Mobilier de birou','Mobilier'],['09331200-0','Panouri fotovoltaice','Energie verde'],['79411000-8','Consultanță în management','Consultanță'],['33100000-1','Echipamente medicale','Echipamente medicale']];
 const lei=n=>new Intl.NumberFormat('ro-RO').format(Math.round(n))+' lei';
 
@@ -62,6 +62,8 @@ const FEED=[
 {id:'F4',title:'Sistem fotovoltaic 50 kWp',buyer:'Metal Form SA',kind:'IMM',city:'Arad',program:'Fonduri Europene',domain:'Energie verde',cpv:'09331200-0',budget:310000,deadline:'20.12.2026',offers:1},
 {id:'F5',title:'Consultanță implementare proiect',buyer:'Cafeneaua Colț SRL',kind:'Startup',city:'Brașov',program:'Start-Up Nation',domain:'Consultanță',cpv:'79411000-8',budget:10000,deadline:'01.12.2026',offers:4},
 {id:'F6',title:'Ecograf portabil pentru dispensar',buyer:'Primăria Orașului Otopeni',kind:'Primărie',city:'Ilfov',program:'PNRR',domain:'Echipamente medicale',cpv:'33100000-1',budget:185000,deadline:'15.12.2026',offers:0},
+{id:'F8',title:'Ofertă pentru înscriere: espressor 2 grupuri',buyer:'Ioana M., aplicant Start-Up Nation',kind:'Aplicant',city:'Cluj-Napoca',program:'Start-Up Nation',domain:'Echipamente HoReCa',cpv:'39221000-7',budget:18000,deadline:'26.11.2026',offers:1},
+{id:'F9',title:'Ofertă pentru înscriere: laptop și imprimantă 3D',buyer:'Radu P., aplicant Start-Up Nation',kind:'Aplicant',city:'Iași',program:'Start-Up Nation',domain:'Echipamente IT',cpv:'30213100-6',budget:14100,deadline:'27.11.2026',offers:0},
 {id:'F7',title:'Servicii migrare cloud și securitate',buyer:'Logistic Fast SRL',kind:'IMM',city:'Ploiești',program:'Fonduri Europene',domain:'Servicii IT',cpv:'72000000-5',budget:240000,deadline:'18.12.2026',offers:2}];
 
 const TRACK0=[{id:'T1',title:'Mobilier birouri, 14 posturi',buyer:'Atelier Verde SRL',price:52900,status:'evaluare'},{id:'T2',title:'Servicii migrare cloud și securitate',buyer:'Logistic Fast SRL',price:228000,status:'trimisa'},{id:'T3',title:'Echipamente IT școală gimnazială',buyer:'Primăria Comunei Corbeanca',price:96400,status:'castigata'}];
@@ -76,7 +78,7 @@ const inputCls="min-h-[40px] w-full rounded-lg border border-line bg-white px-3 
 
 function Toast({msg,onClose}){useEffect(()=>{if(!msg)return;const t=setTimeout(onClose,4500);return()=>clearTimeout(t)},[msg]);if(!msg)return null;return <div className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center px-4"><div role="status" className="fade-in pointer-events-auto flex w-full max-w-[440px] items-start gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lift"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" aria-hidden="true"/><span className="flex-1">{msg}</span><button onClick={onClose} aria-label="Închide" className="text-slate-400 hover:text-white"><X className="h-4 w-4"/></button></div></div>}
 
-function Nav({view,setView}){const tabs=[['landing','Prezentare',Sparkles],['beneficiar','Beneficiar',Building2],['furnizor','Furnizor',Store]];
+function Nav({view,setView}){const tabs=[['landing','Prezentare',Sparkles],['aplicant','Înscriere SUN',Rocket],['beneficiar','Beneficiar',Building2],['furnizor','Furnizor',Store]];
 return <header className="sticky top-0 z-40 border-b border-line bg-white/85 backdrop-blur">
 <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
 <button onClick={()=>setView('landing')} className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-lg bg-navy-700 text-white"><Landmark className="h-4 w-4" aria-hidden="true"/></span><span className="text-[17px] font-bold tracking-tight">FondMarket</span></button>
@@ -93,24 +95,24 @@ function Landing({setView}){
 const [role,setRole]=useState('beneficiar');const [prog,setProg]=useState('Toate');
 const list=FEED.filter(f=>prog==='Toate'||f.program===prog);
 const total=list.reduce((a,f)=>a+f.budget,0);
-const steps=role==='beneficiar'?[[FileText,'Publici cererea de ofertă','Descrii nevoia, alegi codul CPV și bugetul estimat. Specificațiile minime din proiectul aprobat se preiau automat.'],[ShieldCheck,'Primești 3+ oferte verificate','Doar furnizori cu firmă verificată, fără conflict de interese, cu istoric și rating de la alți beneficiari.'],[CheckCircle2,'Alegi și exporți dosarul','Comparația, procesul-verbal de selecție și dovezile de transmitere ies gata pentru cererea de rambursare.']]
+const steps=role==='aplicant'?[[ShoppingCart,'Alegi echipamentele pe categorii','Catalog de produse de la furnizori verificați, cu prețuri orientative și eligibilitatea fiecărui produs în program.'],[Calculator,'Îți vezi bugetul pe loc','Totalul, grantul de până la 250.000 lei și cofinanțarea de minim 10% se calculează pe măsură ce adaugi produse.'],[FileText,'Primești ofertele pentru depunere','Furnizorii îți trimit oferte de preț în numele lor, gratuit. După aprobare, devin specificațiile minime pentru achiziție.']]:role==='beneficiar'?[[FileText,'Publici cererea de ofertă','Descrii nevoia, alegi codul CPV și bugetul estimat. Specificațiile minime din proiectul aprobat se preiau automat.'],[ShieldCheck,'Primești 3+ oferte verificate','Doar furnizori cu firmă verificată, fără conflict de interese, cu istoric și rating de la alți beneficiari.'],[CheckCircle2,'Alegi și exporți dosarul','Comparația, procesul-verbal de selecție și dovezile de transmitere ies gata pentru cererea de rambursare.']]
 :[[Search,'Găsești cereri finanțate','Feed filtrat pe domeniul tău și pe programul de finanțare, cu buget estimat și termen.'],[Send,'Trimiți oferta în 2 minute','Ofertă în numele firmei tale, cu specificații verificate automat față de cerință.'],[Trophy,'Urmărești și câștigi','Vezi starea fiecărei oferte, de la trimisă la câștigată, și primești plata din contul dedicat proiectului.']];
 return <main className="fade-in">
 <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-14 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-16">
 <div>
-<Badge tone="emerald" icon={ShieldCheck}>Conform cu regulile de achiziție din programe</Badge>
+<Badge tone="emerald" icon={ShieldCheck}>Gratuit pentru furnizori · conform cu regulile programelor</Badge>
 <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl">Achiziții pentru proiecte finanțate, fără dosare întoarse.</h1>
 <p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">FondMarket conectează antreprenori, IMM-uri și primării cu furnizori verificați de echipamente, software și servicii. Cereri de ofertă, oferte comparabile și documente gata de decont.</p>
 <fieldset className="mt-8"><legend className="text-sm font-medium text-slate-700">Sunt</legend>
-<div className="mt-2 grid gap-3 sm:grid-cols-2">
-{[['beneficiar','Beneficiar de finanțare','Antreprenor, IMM sau primărie',Building2],['furnizor','Furnizor sau consultant','Echipamente, software, servicii',Store]].map(([k,t,s,Ic])=>
-<label key={k} className={`flex cursor-pointer items-start gap-3 rounded-xl border bg-white p-4 transition ${role===k?'border-navy-700 ring-4 ring-navy-100':'border-line hover:border-slate-300'}`}>
+<div className="mt-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+{[['aplicant','Mă înscriu în Start-Up Nation','Am nevoie de oferte pentru depunere',Rocket],['beneficiar','Am finanțarea aprobată','Cumpăr echipamentele din proiect',Building2],['furnizor','Sunt furnizor','Gratuit: primesc cereri de ofertă',Store]].map(([k,t,s,Ic])=>
+<label key={k} className={`flex cursor-pointer items-center gap-3 rounded-xl border bg-white p-3 transition ${role===k?'border-navy-700 ring-4 ring-navy-100':'border-line hover:border-slate-300'}`}>
 <input type="radio" name="role" value={k} checked={role===k} onChange={()=>setRole(k)} className="sr-only"/>
 <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${role===k?'bg-navy-700 text-white':'bg-slate-100 text-slate-600'}`}><Ic className="h-5 w-5" aria-hidden="true"/></span>
 <span><span className="block font-semibold">{t}</span><span className="block text-sm text-slate-500">{s}</span></span></label>)}
 </div></fieldset>
 <div className="mt-6 flex flex-wrap gap-3">
-<Btn onClick={()=>setView(role)}>{role==='beneficiar'?'Publică o cerere de ofertă':'Vezi oportunitățile'}<ArrowRight className="h-4 w-4" aria-hidden="true"/></Btn>
+<Btn onClick={()=>setView(role)}>{role==='aplicant'?'Alege produsele pentru proiect':role==='beneficiar'?'Încarcă proiectul aprobat':'Vezi cererile de ofertă'}<ArrowRight className="h-4 w-4" aria-hidden="true"/></Btn>
 <Btn variant="ghost" onClick={()=>document.getElementById('cum').scrollIntoView({behavior:'smooth'})}>Cum funcționează</Btn>
 </div></div>
 
@@ -152,6 +154,71 @@ return <main className="fade-in">
 </main>}
 
 /* ---------------- BENEFICIAR ---------------- */
+/* ---------- APLICANT: oferte de preț pentru înscrierea în Start-Up Nation ---------- */
+const APP_CATS=[['HoReCa',Coffee],['IT și birotică',Laptop],['Mobilier',Sofa],['Beauty',Scissors],['Atelier și producție',Wrench],['Site și software',Globe],['Autoturism',Car]];
+const ELIG={a:'Echipamente tehnologice (lit. a)',e:'Mobilier și birotică (lit. e)',g:'IT, site și software (lit. g)',k:'Autoturism, plafon 50.000 lei (lit. k)'};
+const APP_P=[
+{id:'q1',cat:'HoReCa',name:'Espressor profesional, 2 grupuri',specs:'15 bar · boiler 11 L',price:17900,sup:4,el:'a'},
+{id:'q2',cat:'HoReCa',name:'Râșniță profesională de cafea',specs:'on-demand · 64 mm',price:3200,sup:3,el:'a'},
+{id:'q3',cat:'HoReCa',name:'Frigider vertical inox, 600 L',specs:'0…+8 °C · ventilat',price:6750,sup:4,el:'a'},
+{id:'q4',cat:'HoReCa',name:'Cuptor electric cu convecție',specs:'6 tăvi GN · 9 kW',price:11200,sup:3,el:'a'},
+{id:'q5',cat:'HoReCa',name:'Vitrină frigorifică prăjituri',specs:'120 cm · sticlă curbată',price:7600,sup:2,el:'a'},
+{id:'q6',cat:'IT și birotică',name:'Laptop 15", 16 GB RAM',specs:'SSD 512 GB · Windows 11 Pro',price:4290,sup:5,el:'g'},
+{id:'q7',cat:'IT și birotică',name:'Multifuncțională laser color',specs:'A4 · 25 pag/min · rețea',price:2150,sup:5,el:'g'},
+{id:'q8',cat:'IT și birotică',name:'Sistem POS cu imprimantă fiscală',specs:'ecran 15" · cititor coduri',price:3400,sup:4,el:'g'},
+{id:'q9',cat:'Mobilier',name:'Set mese și scaune, 20 locuri',specs:'lemn masiv · uz comercial',price:8400,sup:3,el:'e'},
+{id:'q10',cat:'Mobilier',name:'Mobilier recepție modular',specs:'3 module · blat compozit',price:5600,sup:3,el:'e'},
+{id:'q11',cat:'Beauty',name:'Scaun hidraulic de coafor',specs:'rotire 360° · piele ecologică',price:2300,sup:3,el:'a'},
+{id:'q12',cat:'Beauty',name:'Pat de cosmetică electric',specs:'3 motoare · telecomandă',price:6900,sup:2,el:'a'},
+{id:'q13',cat:'Atelier și producție',name:'Mașină de cusut industrială',specs:'liniară · motor servo',price:5400,sup:2,el:'a'},
+{id:'q14',cat:'Atelier și producție',name:'Imprimantă 3D profesională',specs:'volum 300×300×400 mm',price:9800,sup:3,el:'a'},
+{id:'q15',cat:'Atelier și producție',name:'Laser CO2 de gravură și tăiere',specs:'60 W · masă 60×40 cm',price:14500,sup:2,el:'a'},
+{id:'q16',cat:'Site și software',name:'Site de prezentare și magazin online',specs:'domeniu · găzduire 1 an',price:6000,sup:6,el:'g'},
+{id:'q17',cat:'Site și software',name:'Software de gestiune și stocuri',specs:'licență 1 an · 3 utilizatori',price:3500,sup:4,el:'g'},
+{id:'q18',cat:'Autoturism',name:'Autoturism electric, segment B',specs:'autonomie 300 km',price:49900,sup:3,el:'k'}];
+const BIZ=[['Cafenea sau patiserie','HoReCa'],['Salon de înfrumusețare','Beauty'],['Atelier sau producție','Atelier și producție'],['Servicii IT sau online','IT și birotică']];
+const GRANT_MAX=250000,COF=0.1;
+
+function Aplicant({toast,setView}){
+const [cat,setCat]=useState('HoReCa');const [q,setQ]=useState('');const [cart,setCart]=useState({q1:1,q3:1,q8:1});const [req,setReq]=useState(false);const [busy,setBusy]=useState(false);
+const list=APP_P.filter(p=>(cat==='Toate'||p.cat===cat)&&(!q||(p.name+p.specs).toLowerCase().includes(q.toLowerCase())));
+const lines=Object.entries(cart).filter(([,n])=>n>0).map(([id,n])=>({p:APP_P.find(x=>x.id===id),n}));
+const total=lines.reduce((a,l)=>a+l.p.price*l.n,0);const grant=Math.min(GRANT_MAX,total*(1-COF));const cof=total-grant;const full=Math.round(GRANT_MAX/(1-COF));
+const add=(id,d)=>{setReq(false);setCart(c=>{const n=Math.max(0,(c[id]||0)+d);const o={...c,[id]:n};if(!n)delete o[id];return o})};
+function request(){if(!lines.length){toast('Adaugă cel puțin un produs ca să ceri oferte.');return}setBusy(true);setTimeout(()=>{setBusy(false);setReq(true);toast(`Ai primit ${lines.length} oferte de preț pentru depunere, în numele furnizorilor.`)},1100)}
+return <main className="fade-in mx-auto max-w-7xl px-4 py-8 sm:px-6">
+<div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm text-slate-500">Pentru cei care se înscriu acum în Start-Up Nation</p><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Ofertele de preț pentru cererea de finanțare</h1><p className="mt-2 max-w-2xl text-slate-600">Alegi echipamentele din catalog, îți vezi bugetul și primești oferte de preț de la furnizori verificați, gratuit. După aprobare, aceleași oferte devin specificațiile minime pentru achiziție.</p></div><Badge tone="emerald" icon={Gift}>Gratuit pentru aplicanți</Badge></div>
+
+<div className="mt-6"><p className="text-sm font-medium text-slate-700">Ce afacere deschizi?</p><div className="mt-2 flex gap-2 overflow-x-auto pb-1">{BIZ.map(([b,c])=><button key={b} onClick={()=>setCat(c)} aria-pressed={cat===c} className={`min-h-[40px] flex-none rounded-lg px-3.5 text-sm font-medium ring-1 ring-inset transition ${cat===c?'bg-navy-50 text-navy-700 ring-navy-600':'bg-white text-slate-600 ring-line hover:bg-slate-50'}`}>{b}</button>)}</div></div>
+
+<div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+<div className="min-w-0">
+<Card className="p-3"><div className="flex flex-col gap-3 md:flex-row md:items-center">
+<div role="group" aria-label="Categorii" className="flex gap-1 overflow-x-auto">{[['Toate',ShoppingCart],...APP_CATS].map(([c,Ic])=><button key={c} onClick={()=>setCat(c)} aria-pressed={cat===c} className={`flex min-h-[36px] flex-none items-center gap-1.5 rounded-md px-3 text-sm font-medium transition ${cat===c?'bg-navy-700 text-white':'text-slate-600 hover:bg-slate-100'}`}><Ic className="h-4 w-4" aria-hidden="true"/>{c}</button>)}</div>
+<div className="relative md:ml-auto md:w-60"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true"/><input aria-label="Caută produse" className={`${inputCls} pl-9`} placeholder="Caută un echipament" value={q} onChange={e=>setQ(e.target.value)}/></div></div></Card>
+<div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{list.map(p=>{const Ic=(APP_CATS.find(c=>c[0]===p.cat)||[0,Package])[1];const n=cart[p.id]||0;return <Card key={p.id} className={`flex flex-col p-4 transition ${n?'ring-2 ring-emerald-500':''}`}>
+<div className="flex items-start justify-between gap-2"><span className="grid h-10 w-10 place-items-center rounded-lg bg-ground text-navy-700 ring-1 ring-line"><Ic className="h-5 w-5" aria-hidden="true"/></span><span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true"/>{p.sup} furnizori</span></div>
+<p className="mt-3 font-semibold leading-snug">{p.name}</p><p className="text-xs text-slate-500">{p.specs}</p>
+<p className="mt-2 text-xs text-navy-700">{ELIG[p.el]}</p>
+<div className="mt-auto flex items-end justify-between gap-2 pt-4"><div><p className="text-xs text-slate-500">de la, fără TVA</p><p className="num font-bold">{lei(p.price)}</p></div>
+{n?<div className="flex items-center gap-1"><button onClick={()=>add(p.id,-1)} aria-label={`Scade ${p.name}`} className="grid h-9 w-9 place-items-center rounded-lg ring-1 ring-line hover:bg-slate-50"><Minus className="h-4 w-4"/></button><span className="num w-6 text-center text-sm font-semibold">{n}</span><button onClick={()=>add(p.id,1)} aria-label={`Adaugă încă un ${p.name}`} className="grid h-9 w-9 place-items-center rounded-lg ring-1 ring-line hover:bg-slate-50"><Plus className="h-4 w-4"/></button></div>
+:<Btn variant="ghost" className="px-3" onClick={()=>add(p.id,1)}><Plus className="h-4 w-4" aria-hidden="true"/>Adaugă</Btn>}</div></Card>})}
+{!list.length&&<p className="rounded-xl border border-dashed border-line bg-white p-6 text-sm text-slate-500 sm:col-span-2 xl:col-span-3">Niciun produs pentru căutarea asta. Încearcă altă categorie sau scrie-ne ce echipament îți trebuie.</p>}</div></div>
+
+<Card className="p-5 lg:sticky lg:top-20"><h2 className="flex items-center gap-2 font-semibold"><Calculator className="h-4 w-4 text-navy-700" aria-hidden="true"/>Planul de achiziții</h2>
+{lines.length?<ul className="mt-3 divide-y divide-line">{lines.map(({p,n})=><li key={p.id} className="flex items-start justify-between gap-3 py-2 text-sm"><span>{p.name}{n>1&&<span className="text-slate-500"> × {n}</span>}</span><span className="num whitespace-nowrap font-medium">{lei(p.price*n)}</span></li>)}</ul>:<p className="mt-3 text-sm text-slate-500">Adaugă echipamentele de care ai nevoie din catalog.</p>}
+<dl className="mt-3 space-y-1.5 border-t border-line pt-3 text-sm">
+<div className="flex justify-between"><dt className="text-slate-500">Total echipamente</dt><dd className="num font-semibold">{lei(total)}</dd></div>
+<div className="flex justify-between"><dt className="text-slate-500">Grant (max. 90%, max. 250.000 lei)</dt><dd className="num font-semibold text-emerald-700">{lei(grant)}</dd></div>
+<div className="flex justify-between"><dt className="text-slate-500">Cofinanțarea ta</dt><dd className="num font-semibold">{lei(cof)}</dd></div></dl>
+<div className="mt-3"><div className="h-2 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-emerald-500 transition-all" style={{width:Math.min(100,grant/GRANT_MAX*100)+'%'}}/></div><p className="mt-1 text-xs text-slate-500">{grant>=GRANT_MAX?`Ai atins grantul maxim. Peste ${lei(full)}, diferența e numai cofinanțare.`:`Mai poți folosi ${lei(GRANT_MAX-grant)} din grant. Salariile, chiria și utilitățile se bugetează separat și nu cer oferte.`}</p></div>
+{!req?<Btn className="mt-4 w-full" onClick={request} disabled={busy}><Send className="h-4 w-4" aria-hidden="true"/>{busy?'Se trimit cererile…':`Cere oferte de preț (${lines.length})`}</Btn>
+:<div className="mt-4 space-y-2"><p className="text-sm font-medium">Oferte pentru depunere</p>{lines.map(({p},i)=><div key={p.id} className="flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2"><div className="min-w-0"><p className="truncate text-sm font-medium">{p.name}</p><p className="text-xs text-slate-500">{['Horeca Pro Echipamente','TechDepo Distribuție','Atelier Mobilier Plus','Gastro Line Distribuție'][i%4]} · valabilă 90 de zile</p></div><button onClick={()=>toast('Oferta a fost descărcată ca PDF, în numele furnizorului.')} aria-label={`Descarcă oferta pentru ${p.name}`} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-navy-700 hover:bg-navy-50"><Download className="h-4 w-4"/></button></div>)}
+<div className="rounded-lg bg-navy-50 p-3 text-xs text-navy-800">Ofertele rămân în contul tău. După aprobare, le găsești în <button onClick={()=>setView('beneficiar')} className="font-semibold underline">Achiziții Start-Up Nation</button>, ca specificații minime.</div></div>}
+<p className="mt-3 text-xs text-slate-500">Prețurile din catalog sunt orientative. Oferta fermă vine de la furnizor, în numele lui.</p>
+</Card></div>
+</main>}
+
 /* ---------- START-UP NATION: achiziții din proiectul aprobat ---------- */
 const SUN_BASE=[
 {id:'a1',name:'Espressor profesional',cat:'HoReCa',qty:1,val:17500,cpv:'39221000-7',specs:[['Grupuri',2,''],['Presiune',15,'bar'],['Boiler',10,'L']]},
@@ -164,6 +231,7 @@ const SUN_BASE=[
 {id:'a8',name:'Plăcuțe informative (2 buc.)',cat:'Promovare',qty:2,val:400,cpv:'',specs:[['Format','A4',''],['Material','PVC','']]}];
 const SUN_SUP={HoReCa:['Horeca Pro Echipamente','Gastro Line Distribuție','Bucătăria Pro'],IT:['TechDepo Distribuție','Digital Office Solutions','NetPro Systems'],Mobilier:['Atelier Mobilier Plus','Office Design Mobila','Lemn și Birou'],Promovare:['Print Express']};
 const SUN_FEE={dosar:149,proiect:1190};
+const SUN_AVAIL={HoReCa:4,IT:5,Mobilier:3,Promovare:2};
 const specTxt=([k,v,u],min=true)=>typeof v==='number'?`${k} ${min?'≥ ':''}${String(v).replace('.',',')}${u?(u==='"'?'':' ')+u:''}`:`${k}: ${v}`;
 function makeOffers(it){const sups=SUN_SUP[it.cat]||SUN_SUP.HoReCa;const f=[1.03,0.86,0.97];
 return sups.slice(0,it.val<1000?1:3).map((name,i)=>{const bad=i===1&&it.specs.some(s=>typeof s[1]==='number');const off=it.specs.map(([k,v,u])=>[k,typeof v==='number'?(bad&&k===it.specs.find(s=>typeof s[1]==='number')[0]?Math.max(1,Math.floor(v*0.5)):(v>=10&&i===2?Math.round(v*1.15):v)):v,u]);
@@ -208,12 +276,13 @@ return <div className="fade-in space-y-6">
 </Card>
 
 {loaded&&<Card className="overflow-hidden">
-<div className="flex flex-wrap items-end justify-between gap-2 border-b border-line px-5 py-4"><div><h3 className="font-semibold">2. Lista de achiziții aprobată</h3><p className="text-sm text-slate-500">{SUN_BASE.length} poziții, {lei(total)} fără TVA. Specificațiile minime sunt blocate în cererile de ofertă.</p></div><Badge tone="navy" icon={Lock}>Preluat din oferta de la depunere</Badge></div>
-<table className="w-full text-sm"><thead className="hidden bg-ground text-left text-xs font-medium text-slate-500 md:table-header-group"><tr><th className="px-5 py-2.5">Achiziție</th><th className="px-5 py-2.5">Specificații minime</th><th className="px-5 py-2.5 text-right">Valoare aprobată</th><th className="px-5 py-2.5">Dosar</th><th className="px-5 py-2.5"><span className="sr-only">Acțiune</span></th></tr></thead>
+<div className="flex flex-wrap items-end justify-between gap-2 border-b border-line px-5 py-4"><div><h3 className="font-semibold">2. Lista de achiziții aprobată</h3><p className="text-sm text-slate-500">{SUN_BASE.length} poziții, {lei(total)} fără TVA. Vezi gratuit câți furnizori verificați sunt pentru fiecare echipament. Trimiterea cererilor și documentele sunt incluse în pachet.</p></div><Badge tone="navy" icon={Lock}>Preluat din oferta de la depunere</Badge></div>
+<table className="w-full text-sm"><thead className="hidden bg-ground text-left text-xs font-medium text-slate-500 md:table-header-group"><tr><th className="px-5 py-2.5">Achiziție</th><th className="px-5 py-2.5">Specificații minime</th><th className="px-5 py-2.5 text-right">Valoare aprobată</th><th className="px-5 py-2.5">Furnizori</th><th className="px-5 py-2.5">Dosar</th><th className="px-5 py-2.5"><span className="sr-only">Acțiune</span></th></tr></thead>
 <tbody className="divide-y divide-line">{SUN_BASE.map(it=>{const [lab,tone]=status(it);return <tr key={it.id} className={`grid grid-cols-2 gap-x-4 gap-y-2 px-5 py-4 md:table-row md:p-0 ${sel===it.id?'bg-navy-50/50':''}`}>
 <td className="col-span-2 md:px-5 md:py-3.5"><p className="font-medium">{it.name}</p><p className="text-xs text-slate-500">{it.cat}{it.val<1000?' · sub 1.000 lei: o singură ofertă':''}</p></td>
 <td className="col-span-2 md:px-5 md:py-3.5"><div className="flex flex-wrap gap-1">{it.specs.map(x=><span key={x[0]} className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">{specTxt(x)}</span>)}</div></td>
 <td className="num whitespace-nowrap font-semibold md:px-5 md:py-3.5 md:text-right">{lei(it.val)}</td>
+<td className="md:px-5 md:py-3.5"><span className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-medium text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true"/>{SUN_AVAIL[it.cat]} verificați</span></td>
 <td className="text-right md:px-5 md:py-3.5 md:text-left"><Badge tone={tone}>{lab}</Badge></td>
 <td className="col-span-2 md:px-5 md:py-3.5 md:text-right"><Btn variant={sel===it.id?'navy':'ghost'} className="w-full px-3 md:w-auto" onClick={()=>{setSel(it.id);setTimeout(()=>document.getElementById('dosar')?.scrollIntoView({behavior:'smooth',block:'start'}),50)}}>{done(it)?'Deschide dosarul':'Pornește achiziția'}<ChevronRight className="h-4 w-4" aria-hidden="true"/></Btn></td></tr>})}</tbody></table></Card>}
 
@@ -321,7 +390,7 @@ const cols=[['trimisa','Trimisă',Send,'slate'],['evaluare','În evaluare',Hourg
 const next={trimisa:'evaluare',evaluare:'castigata'};
 const won=track.filter(t=>t.status==='castigata').reduce((a,t)=>a+t.price,0);
 return <main className="fade-in mx-auto max-w-7xl px-4 py-8 sm:px-6">
-<div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm text-slate-500">TechDepo Distribuție SRL · furnizor verificat</p><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Oportunități pentru tine</h1></div><div className="flex items-center gap-2"><Badge tone="navy" icon={BadgeCheck}>Verificat ONRC</Badge><Badge tone="emerald" icon={Star}>4,9 din 128 recenzii</Badge></div></div>
+<div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm text-slate-500">TechDepo Distribuție SRL · furnizor verificat</p><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Oportunități pentru tine</h1></div><div className="flex items-center gap-2"><Badge tone="emerald" icon={Gift}>Gratuit pentru furnizori</Badge><Badge tone="navy" icon={BadgeCheck}>Verificat ONRC</Badge><Badge tone="slate" icon={Star}>4,9 din 128 recenzii</Badge></div></div>
 
 <section aria-labelledby="trk" className="mt-6"><div className="flex flex-wrap items-end justify-between gap-2"><h2 id="trk" className="font-semibold">Ofertele mele</h2><p className="text-sm text-slate-500">Valoare câștigată: <span className="num font-semibold text-emerald-700">{lei(won)}</span></p></div>
 <div className="mt-3 grid gap-4 md:grid-cols-3">{cols.map(([k,l,Ic,tone])=>{const items=track.filter(t=>t.status===k);return <div key={k} className="rounded-xl border border-line bg-white/60 p-3">
@@ -337,8 +406,8 @@ return <main className="fade-in mx-auto max-w-7xl px-4 py-8 sm:px-6">
 </div></Card>
 <p className="mt-3 text-sm text-slate-500">{feed.length} {feed.length===1?'cerere':'cereri'} potrivite</p>
 <ul className="mt-2 space-y-3">{feed.map(f=>{const done=sent.has(f.title);return <li key={f.id}><Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-<span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg ${f.kind==='Primărie'?'bg-navy-50 text-navy-700':'bg-slate-100 text-slate-600'}`}>{f.kind==='Primărie'?<Landmark className="h-5 w-5" aria-hidden="true"/>:<Building2 className="h-5 w-5" aria-hidden="true"/>}</span>
-<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="font-semibold">{f.title}</p><ProgramBadge p={f.program}/></div>
+<span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg ${f.kind==='Primărie'?'bg-navy-50 text-navy-700':'bg-slate-100 text-slate-600'}`}>{f.kind==='Primărie'?<Landmark className="h-5 w-5" aria-hidden="true"/>:f.kind==='Aplicant'?<Rocket className="h-5 w-5" aria-hidden="true"/>:<Building2 className="h-5 w-5" aria-hidden="true"/>}</span>
+<div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="font-semibold">{f.title}</p><ProgramBadge p={f.program}/>{f.kind==='Aplicant'&&<Badge tone="amber" icon={Rocket}>Viitor beneficiar</Badge>}</div>
 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500"><span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" aria-hidden="true"/>{f.buyer} · {f.kind}</span><span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" aria-hidden="true"/>{f.city}</span><span className="flex items-center gap-1"><Tag className="h-3.5 w-3.5" aria-hidden="true"/>CPV {f.cpv}</span><span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" aria-hidden="true"/>până la {f.deadline}</span></p></div>
 <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end"><div className="text-right"><p className="text-xs text-slate-500">Buget estimat</p><p className="num font-semibold">{lei(f.budget)}</p><p className="text-xs text-slate-500">{f.offers} oferte trimise</p></div>
 {done?<Badge tone="emerald" icon={CheckCircle2}>Ofertă trimisă</Badge>:<Btn onClick={()=>setModal(f)}><Send className="h-4 w-4" aria-hidden="true"/>Trimite ofertă</Btn>}</div></Card></li>})}
@@ -367,12 +436,12 @@ return ReactDOM.createPortal(<div className="fixed inset-0 z-50 flex items-end j
 </form></div></div>,document.body)}
 
 function App(){
-const init=()=>{const h=location.hash.slice(1);return ['landing','beneficiar','furnizor'].includes(h)?h:'landing'};
+const init=()=>{const h=location.hash.slice(1);return ['landing','aplicant','beneficiar','furnizor'].includes(h)?h:'landing'};
 const [view,setV]=useState(init);const [msg,setMsg]=useState('');
 const setView=v=>{setV(v);try{history.replaceState(null,'','#'+v)}catch(e){}window.scrollTo({top:0})};
 useEffect(()=>{const f=()=>setV(init());addEventListener('hashchange',f);return()=>removeEventListener('hashchange',f)},[]);
 return <div className="min-h-screen"><Nav view={view} setView={setView}/>
-{view==='landing'&&<Landing setView={setView}/>}{view==='beneficiar'&&<Beneficiar toast={setMsg}/>}{view==='furnizor'&&<Furnizor toast={setMsg}/>}
+{view==='landing'&&<Landing setView={setView}/>}{view==='aplicant'&&<Aplicant toast={setMsg} setView={setView}/>}{view==='beneficiar'&&<Beneficiar toast={setMsg}/>}{view==='furnizor'&&<Furnizor toast={setMsg}/>}
 <Toast msg={msg} onClose={()=>setMsg('')}/></div>}
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
