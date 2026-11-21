@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FondMarket demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&display=swap">
+<style>
+/* VOICE work: a procurement tool for grant-funded firms, shown to colleagues; looks like a shipped product
+   IDEA the beneficiary's grant budget as a timetable board, and the procurement file as numbered stations: products, 3 requests, 3 offers, order
+   PICTURE the live budget readout + meter at top; in the file view, the 3-offer comparison with the winner marked
+   COLOUR white, black, signal red #e4002b for what matters, one grey; night #0e0e0e
+   TYPE Archivo wide 800 for numerals and titles + Archivo for text
+   LAYOUT laptop: thick top rule, title left / huge budget numeral right, catalog + sticky file; phone: title, budget, catalog, slim sticky budget bar */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e0e0e);--ink:light-dark(#111111,#f1f1f1);--grey:light-dark(#5f5f5f,#a3a3a3);--line:light-dark(#d9d9d9,#2c2c2c);--panel:light-dark(#f3f3f3,#181818);--red:light-dark(#e4002b,#ff4d63);--ok:light-dark(#1d6b35,#58c27d)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,Arial,sans-serif;overflow-x:clip}
+a{color:inherit}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(4vw,16px);padding-right:max(4vw,16px)}
+.top{border-top:8px solid var(--ink);border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:5}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-size:24px;font-weight:800;font-stretch:112%;letter-spacing:-.02em}
+.brand span{font-size:13px;color:var(--grey)}
+nav{display:flex;flex-wrap:wrap;gap:4px}
+nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;text-decoration:none;font-weight:600;border-bottom:3px solid transparent}
+nav a[aria-current=page]{border-bottom-color:var(--red)}
+.who{font-size:13px;color:var(--grey)}
+.demo{font-size:13px;color:var(--grey);padding-block:8px;border-bottom:1px solid var(--line)}
+.view[hidden]{display:none}
+h1,h2,h3{margin:0;letter-spacing:-.02em;line-height:1.05}
+h1{font-size:clamp(32px,4.4vw,48px);font-weight:800;font-stretch:112%;text-wrap:balance}
+h2{font-size:clamp(24px,2.6vw,30px);font-weight:800;font-stretch:108%}
+h3{font-size:17px;font-weight:700;line-height:1.25}
+p{margin:0}
+.muted{color:var(--grey)}
+.small{font-size:13px}
+.lead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(24px,4vw,56px);padding-block:clamp(28px,4vw,48px);align-items:end}
+.lead p{max-width:60ch;margin-top:12px;color:var(--grey)}
+.budget{border-top:4px solid var(--ink);padding-top:12px}
+.big{font-size:clamp(40px,9vw,112px);font-weight:800;font-stretch:118%;line-height:.95;letter-spacing:-.03em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.big.over{color:var(--red)}
+.meter{display:flex;height:18px;background:var(--panel);margin-top:14px}
+.meter i{display:block;height:100%}
+.meter .u{background:var(--ink)}
+.meter .c{background:var(--red)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--grey)}
+.legend b{color:var(--ink);font-weight:600;white-space:nowrap}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+input,textarea,select{min-height:44px;border:1px solid var(--line);background:var(--bg);padding:8px 12px;font-size:16px;border-radius:0}
+textarea{min-height:88px;resize:vertical}
+.grantrow{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:16px}
+.grantrow .field{width:200px}
+.btn{min-height:44px;padding:0 18px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.shop{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;padding-bottom:64px;align-items:start}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-block:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.chip{min-height:40px;padding:0 14px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:600}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tools input{flex:1 1 200px}
+.ai{background:var(--panel);padding:18px;margin-block:16px;display:grid;gap:10px}
+.ai .row,.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.airesult{display:grid;gap:8px}
+.airow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-top:1px solid var(--line);padding-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:16px}
+.card{background:var(--bg);padding:16px;display:flex;flex-direction:column;gap:8px}
+.card svg{width:40px;height:40px;stroke:var(--ink)}
+.card .price{font-size:22px;font-weight:800;font-stretch:110%;white-space:nowrap;margin-top:auto}
+.card .tag{font-size:13px;color:var(--ok)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:44px;height:44px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:18px}
+.qty output{min-width:28px;text-align:center;font-weight:700}
+.file{position:sticky;top:96px;border-top:4px solid var(--ink);padding-top:12px;display:grid;gap:12px}
+.file ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.file li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.num{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.sum{display:flex;justify-content:space-between;gap:12px;font-weight:700}
+.page{padding-block:clamp(28px,4vw,48px) 64px;display:grid;gap:28px}
+.cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px;align-items:start}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-size:13px;color:var(--grey);font-weight:600;border-bottom:2px solid var(--ink);padding:8px 10px}
+td{border-bottom:1px solid var(--line);padding:10px;vertical-align:middle}
+td.num,th.num{text-align:right}
+tr.win td{font-weight:700}
+tr.win td:first-child{box-shadow:inset 4px 0 0 var(--red)}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:4px solid var(--ink)}
+.steps li{padding:12px 12px 12px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}
+.steps .n{font-size:clamp(28px,3.4vw,40px);font-weight:800;font-stretch:115%;line-height:1;color:var(--line)}
+.steps .done .n{color:var(--ink)}
+.steps .now .n{color:var(--red)}
+.steps .t{font-weight:700}
+.blk{display:grid;gap:16px;border-top:1px solid var(--line);padding-top:24px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.plan{background:var(--bg);padding:20px;display:flex;flex-direction:column;gap:10px}
+.plan.pick{box-shadow:inset 0 4px 0 var(--red)}
+.plan .pr{font-size:32px;font-weight:800;font-stretch:112%;white-space:nowrap}
+.plan ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.plan .btn{margin-top:auto}
+.catcard{border:1px solid var(--line);padding:clamp(16px,3vw,24px);display:grid;gap:14px}
+.rfqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.rfq{background:var(--panel);padding:14px;display:grid;gap:6px;align-content:start}
+details{border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-weight:600;min-height:32px}
+.docprev{border:1px solid var(--line);padding:16px;margin-top:8px;display:grid;gap:10px;font-size:14px;background:var(--bg)}
+.docprev .hd{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:8px}
+.kind{color:var(--red);font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-weight:700;white-space:nowrap}
+.s-castigata,.s-trimisa{color:var(--grey)}.s-comandata{color:var(--red)}.s-livrata{color:var(--ok)}.s-necastigata{color:var(--grey);font-weight:400}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:4px solid var(--ink)}
+.stat{padding:14px 16px 14px 0;border-bottom:1px solid var(--line)}
+.stat .v{font-size:clamp(26px,3.2vw,38px);font-weight:800;font-stretch:112%;white-space:nowrap}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.funnel{display:grid;gap:10px}
+.fr{display:grid;grid-template-columns:160px minmax(0,1fr) 100px;gap:12px;align-items:center}
+.fr .bar{height:28px;background:var(--panel)}
+.fr .bar i{display:block;height:100%;background:var(--ink)}
+.fr.hot .bar i{background:var(--red)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;max-width:min(560px,92vw);font-size:15px;z-index:10;display:flex;gap:12px;align-items:center}
+.toast[hidden]{display:none}
+.toast button{background:transparent;border:1px solid var(--bg);color:var(--bg);min-height:36px;padding:0 12px;cursor:pointer}
+.empty{border:1px dashed var(--line);padding:24px;color:var(--grey)}
+.mbar{display:none}
+.specs{display:flex;flex-wrap:wrap;gap:4px}
+.sp{font-size:12px;border:1px solid var(--line);padding:2px 6px;white-space:nowrap}
+.sp.bad{border-color:var(--red);color:var(--red)}
+.okt{color:var(--ok);font-weight:600}.badt{color:var(--red);font-weight:600}
+.card .tag.bad{color:var(--red)}
+.drop{border:2px dashed var(--line);padding:18px;display:grid;gap:10px}
+.drop.on{border-color:var(--red)}
+.rule{border-left:4px solid var(--red);padding:4px 0 4px 14px;max-width:72ch}
+@media(max-width:900px){.shop{grid-template-columns:minmax(0,1fr)}.file{position:static}.cols{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:720px){.lead{grid-template-columns:minmax(0,1fr)}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.mbar{display:flex;position:sticky;top:0;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--ink);color:var(--bg);font-weight:700;z-index:4}.top{position:static}.fr{grid-template-columns:110px minmax(0,1fr) 80px}}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0}.stack td::before{content:attr(data-l);color:var(--grey)}}
+@media(prefers-reduced-motion:no-preference){.meter i{transition:width .5s ease}}
+</style>
+</head>
+<body>
+<header class="top">
+<div class="wrap">
+<div class="brand"><b>FondMarket</b><span>nume de lucru</span></div>
+<nav aria-label="Secțiuni">
+<a href="#proiect">Proiect aprobat</a>
+<a href="#catalog">Catalog</a>
+<a href="#dosar">Dosar de achiziție <span id="navCount"></span></a>
+<a href="#furnizor">Panou furnizor</a>
+<a href="#platforma">Platformă</a>
+</nav>
+<p class="who" id="who"></p>
+</div>
+</header>
+<div class="mbar" id="mbar"><span>Rămas din proiect</span><span id="mbarVal" class="num"></span></div>
+<p class="demo wrap">Prototip demonstrativ: furnizorii, produsele, prețurile, comisioanele și tarifele sunt fictive. Cererile trimise aici sunt văzute de toți cei care deschid pagina conectați.</p>
+
+<main>
+<section class="view" id="v-proiect" hidden>
+<div class="wrap page">
+<div><h1>Pornește de la ce ai aprobat</h1><p class="muted" style="margin-top:10px;max-width:68ch">Încarci decizia de admitere și ofertele depuse la înscriere. Platforma extrage lista de achiziții și specificațiile minime ale fiecărui echipament, apoi îți arată doar produsele care le îndeplinesc.</p></div>
+<p class="rule small">La achiziție, echipamentul trebuie să aibă cel puțin specificațiile din oferta de la depunere. Poți cumpăra unul mai performant, dacă păstrează denumirea și cel puțin operațiile echipamentului inițial (procedura SUN, art. 5.2 alin. 3).</p>
+<div class="cols">
+<div class="drop" id="drop">
+<h2>Documentele proiectului</h2>
+<div class="field"><label for="upFiles">Decizia de admitere și ofertele de la depunere</label><input id="upFiles" type="file" multiple accept="image/*,application/pdf"></div>
+<ul class="small" id="upList" style="margin:0;padding-left:18px"></ul>
+<div class="field"><label for="baseText">Sau lipește textul ofertei de la depunere</label><textarea id="baseText" rows="7"></textarea></div>
+<div class="row"><button class="btn red" type="button" id="extract">Extrage achizițiile și specificațiile</button><button class="btn ghost" type="button" id="useEx">Folosește exemplul</button><span class="small muted" id="exState"></span></div>
+<p class="small muted">Pozele (JPG, PNG) și textul sunt citite de asistent. În demo, PDF-urile nu se citesc automat: fă o captură a paginii sau copiază textul.</p>
+</div>
+<div class="file" style="position:static">
+<h2>Ce urmează</h2>
+<ol class="small" style="margin:0;padding-left:20px;display:grid;gap:6px">
+<li>Fiecare achiziție aprobată primește specificațiile minime.</li>
+<li>Catalogul marchează ce e conform și ce e sub specificații.</li>
+<li>Cererile de ofertă cer explicit specificațiile minime.</li>
+<li>O ofertă sub specificații nu poate câștiga, chiar dacă e mai ieftină.</li>
+<li>Procesul-verbal menționează verificarea față de oferta de la depunere.</li>
+</ol></div>
+</div>
+<div id="baseOut"></div>
+</div>
+</section>
+
+<section class="view" id="v-catalog">
+<div class="wrap lead">
+<div>
+<h1>Echipamentele din grant, cu dosarul de achiziție gata făcut</h1>
+<p>Alegi produsele, iar platforma trimite cererile de ofertă la câte 3 furnizori, compară ofertele și îți pregătește documentele pentru dosar.</p>
+<p><a href="#proiect"><b>Ai proiectul aprobat? Încarcă oferta de la depunere</b></a> și vezi doar produsele care îndeplinesc specificațiile minime.</p>
+<div class="grantrow">
+<div class="field"><label for="grant">Grantul aprobat (lei)</label><input id="grant" type="number" min="0" step="1000" value="250000" inputmode="numeric"></div>
+<p class="small muted" style="max-width:34ch">Grantul acoperă cel mult 90% din proiect. Restul este cofinanțarea ta.</p>
+</div>
+</div>
+<div class="budget" aria-live="polite">
+<p class="small muted">Rămas din proiect, fără TVA</p>
+<p class="big" id="left"></p>
+<div class="meter" aria-hidden="true"><i class="u" id="mU"></i><i class="c" id="mC"></i></div>
+<div class="legend" id="legend"></div>
+</div>
+</div>
+<div class="wrap shop">
+<div>
+<div class="ai" id="ai">
+<h2>Nu știi ce să alegi?</h2>
+<p class="muted">Descrie afacerea în două fraze și primești o listă de echipamente din catalog, cu motivul fiecăruia.</p>
+<label for="aiText" class="small" style="font-weight:600">Afacerea ta</label>
+<textarea id="aiText">Deschid o cafenea mică de specialitate în Brașov, cu 20 de locuri și prăjituri făcute pe loc. Vreau și casă de marcat și un laptop pentru contabilitate.</textarea>
+<div class="row"><button class="btn red" id="aiGo" type="button">Recomandă echipamente</button><span class="small muted" id="aiState"></span></div>
+<div class="airesult" id="aiOut"></div>
+</div>
+<div class="tools" role="group" aria-label="Filtre">
+<span id="cats" class="seg"></span>
+<input id="q" type="search" placeholder="Caută: espressor, laptop, birou" aria-label="Caută în catalog">
+<select id="sort" aria-label="Ordonează"><option value="rel">Recomandate</option><option value="asc">Preț crescător</option><option value="desc">Preț descrescător</option></select>
+</div>
+<div class="grid" id="grid"></div>
+</div>
+<aside class="file" aria-label="Produsele alese">
+<h2>Produsele alese</h2>
+<ul id="fileList"></ul>
+<div class="sum"><span>Estimat, fără TVA</span><span class="num" id="fileTotal"></span></div>
+<a class="btn" href="#dosar">Pregătește dosarul de achiziție</a>
+</aside>
+</div>
+</section>
+
+<section class="view" id="v-dosar" hidden>
+<div class="wrap page">
+<div><h1>Dosarul de achiziție</h1><p class="muted" style="margin-top:10px;max-width:70ch">Pentru fiecare categorie de echipamente: 3 cereri de ofertă, 3 oferte primite, tabelul comparativ și procesul-verbal de selecție, verificate față de oferta de la depunere.</p></div>
+<ol class="steps" id="steps"></ol>
+<div class="form">
+<div class="field"><label for="firm">Firma beneficiară</label><input id="firm" value="Cafeneaua Colț de Brașov SRL"></div>
+<div class="field"><label for="cui">CUI</label><input id="cui" value="RO00000000"></div>
+<div class="field"><label for="prog">Program</label><select id="prog"><option>Start-Up Nation 2024, sesiunea 1</option><option>Start-Up Nation 2024, sesiunea 2</option><option>e-DRIVE, Măsura 1</option></select></div>
+<div class="field"><label for="admin">Administrator</label><input id="admin" value="Ioana Popescu"></div>
+</div>
+<div id="dosarBody"></div>
+</div>
+</section>
+
+<section class="view" id="v-furnizor" hidden>
+<div class="wrap page">
+<div><h1>Panou furnizor</h1><p class="muted" style="margin-top:10px">Ce vede un comerciant: cererile de ofertă primite, ofertele câștigate și comisionul datorat.</p></div>
+<div class="seg" id="supSeg" role="group" aria-label="Alege furnizorul"></div>
+<div class="stats" id="supStats"></div>
+<div class="scroll"><table class="stack"><thead><tr><th>Beneficiar</th><th>Trimisă de</th><th class="num">Oferta, fără TVA</th><th>Stare</th><th class="num">Comision</th><th>Acțiune</th></tr></thead><tbody id="supRows"></tbody></table></div>
+<p class="small muted">Comisionul se facturează lunar furnizorului, doar pentru comenzile livrate. Nu apare pe factura beneficiarului.</p>
+</div>
+</section>
+
+<section class="view" id="v-platforma" hidden>
+<div class="wrap page">
+<div><h1 id="platTitle">Platforma</h1><p class="muted" style="margin-top:10px">Toate dosarele trimise de colegi, în timp real. Venitul vine din două surse: pachetele de dosar plătite de beneficiari și comisionul plătit de furnizori.</p></div>
+<div class="stats" id="platStats"></div>
+<div class="cols">
+<div><h2>De la cerere de ofertă la comision</h2><div class="funnel" id="funnel" style="margin-top:16px"></div></div>
+<div><h2>Comision pe furnizor</h2><div class="funnel" id="bySup" style="margin-top:16px"></div></div>
+</div>
+<p class="small muted" id="liveNote"></p>
+</div>
+</section>
+</main>
+<div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button type="button" id="toastX">Închide</button></div>
+
+<script>
+{
+const cuse=n=>(window.claude&&typeof window.claude.use==='function')?window.claude.use(n):Promise.resolve(null);
+const SUP={
+tech:{name:'TechDepo Distribuție SRL',city:'București',del:5,war:24,rate:.05,f:1},
+digital:{name:'Digital Office Solutions SRL',city:'Timișoara',del:7,war:24,rate:.05,f:.97},
+netpro:{name:'NetPro Systems SRL',city:'Iași',del:4,war:36,rate:.05,f:1.06},
+horeca:{name:'Horeca Pro Echipamente SRL',city:'Cluj-Napoca',del:10,war:24,rate:.06,f:1},
+gastro:{name:'Gastro Line Distribuție SRL',city:'Constanța',del:12,war:24,rate:.06,f:1.04},
+bucpro:{name:'Bucătăria Pro SRL',city:'București',del:8,war:12,rate:.06,f:.98},
+mobila:{name:'Atelier Mobilier Plus SRL',city:'Brașov',del:14,war:24,rate:.08,f:1},
+officed:{name:'Office Design Mobila SRL',city:'Oradea',del:10,war:24,rate:.08,f:1.07},
+lemn:{name:'Lemn și Birou SRL',city:'Suceava',del:21,war:36,rate:.08,f:.95},
+beauty:{name:'Salon Expert Distribuție SRL',city:'Iași',del:7,war:24,rate:.07,f:1},
+bequip:{name:'Beauty Equip Pro SRL',city:'București',del:5,war:12,rate:.07,f:1.03},
+coafor:{name:'Coafor Total Distribuție SRL',city:'Craiova',del:9,war:24,rate:.07,f:1.08}};
+const CATSUP={IT:['tech','digital','netpro'],HoReCa:['horeca','gastro','bucpro'],Mobilier:['mobila','officed','lemn'],Beauty:['beauty','bequip','coafor']};
+const FEE=199,SUB=790;
+const P=[
+{id:'p1',cat:'IT',type:'laptop',name:'Laptop business 15", 16 GB RAM',price:4290,sp:{ram:16,ssd:512,diag:15.6}},
+{id:'p16',cat:'IT',type:'laptop',name:'Laptop 14", 8 GB RAM',price:2690,sp:{ram:8,ssd:256,diag:14}},
+{id:'p2',cat:'IT',type:'multifunctionala',name:'Multifuncțională laser color',price:2150,sp:{color:1,ppm:25}},
+{id:'p3',cat:'IT',type:'monitor',name:'Monitor 27", rezoluție QHD',price:1190,sp:{diag:27,rez:1440}},
+{id:'p4',cat:'IT',type:'pos',name:'Sistem POS cu imprimantă fiscală',price:3400,sp:{fiscal:1,diag:15}},
+{id:'p5',cat:'HoReCa',type:'espressor',name:'Espressor profesional, 2 grupuri',price:18900,sp:{grupuri:2,boiler:11,bar:15}},
+{id:'p17',cat:'HoReCa',type:'espressor',name:'Espressor profesional, 1 grup',price:9900,sp:{grupuri:1,boiler:5,bar:15}},
+{id:'p6',cat:'HoReCa',type:'frigider',name:'Frigider vertical inox, 600 L',price:6750,sp:{volum:600,inox:1}},
+{id:'p18',cat:'HoReCa',type:'frigider',name:'Frigider vertical inox, 400 L',price:4900,sp:{volum:400,inox:1}},
+{id:'p7',cat:'HoReCa',type:'masina_vase',name:'Mașină profesională de spălat vase',price:9800,sp:{cosuri:60}},
+{id:'p8',cat:'HoReCa',type:'cuptor',name:'Cuptor electric cu convecție, 6 tăvi',price:11200,sp:{tavi:6,putere:9}},
+{id:'p19',cat:'HoReCa',type:'cuptor',name:'Cuptor electric cu convecție, 4 tăvi',price:7600,sp:{tavi:4,putere:6}},
+{id:'p9',cat:'Mobilier',type:'birou',name:'Birou de lucru, 160 cm',price:1450,sp:{lungime:160}},
+{id:'p10',cat:'Mobilier',type:'scaun_birou',name:'Scaun ergonomic de birou',price:890,sp:{ergonomic:1}},
+{id:'p11',cat:'Mobilier',type:'receptie',name:'Mobilier de recepție, modular',price:5600,sp:{module:3}},
+{id:'p12',cat:'Mobilier',type:'set_mese',name:'Set mese și scaune, 20 de locuri',price:8400,sp:{locuri:20}},
+{id:'p13',cat:'Beauty',type:'scaun_coafor',name:'Scaun hidraulic de coafor',price:2300,sp:{hidraulic:1}},
+{id:'p14',cat:'Beauty',type:'spalator',name:'Spălător de păr cu fotoliu',price:4100,sp:{fotoliu:1}},
+{id:'p15',cat:'Beauty',type:'pat_cosmetica',name:'Pat de cosmetică electric',price:6900,sp:{motoare:3}}
+].map(p=>({...p,sup:CATSUP[p.cat][0]}));
+const SPEC={ram:['RAM','GB'],ssd:['SSD','GB'],diag:['Diagonală','"'],color:['Color',''],ppm:['Viteză','pag/min'],rez:['Rezoluție verticală','px'],fiscal:['Imprimantă fiscală',''],grupuri:['Grupuri',''],boiler:['Boiler','L'],bar:['Presiune','bar'],volum:['Volum','L'],inox:['Carcasă inox',''],cosuri:['Coșuri/oră',''],tavi:['Tăvi',''],putere:['Putere','kW'],lungime:['Lungime','cm'],ergonomic:['Ergonomic',''],module:['Module',''],locuri:['Locuri',''],hidraulic:['Hidraulic',''],fotoliu:['Fotoliu inclus',''],motoare:['Motoare','']};
+const BOOL=['color','fiscal','inox','ergonomic','hidraulic','fotoliu'];
+const TYPES=[...new Set(P.map(p=>p.type))];
+const EXTEXT=`OFERTĂ DE PREȚ nr. 118 / 12.08.2025
+Furnizor: Horeca Pro Echipamente SRL, Cluj-Napoca
+Către: Cafeneaua Colț de Brașov SRL (în înființare)
+
+1. Espressor profesional 2 grupuri, presiune 15 bar, boiler min. 10 L – 1 buc – 17.500 lei fără TVA
+2. Frigider vertical inox, volum min. 550 L – 1 buc – 6.900 lei
+3. Cuptor electric cu convecție, min. 6 tăvi GN, putere min. 8 kW – 1 buc – 10.800 lei
+4. Vitrină frigorifică pentru prăjituri, lungime min. 120 cm – 1 buc – 7.400 lei
+5. Sistem POS cu imprimantă fiscală, ecran min. 15" – 1 buc – 3.500 lei
+6. Laptop 15", min. 16 GB RAM, SSD min. 512 GB – 1 buc – 4.200 lei
+7. Set mese și scaune, minim 20 locuri – 1 buc – 8.000 lei
+Valabilitate 90 zile.`;
+const EXBASE=[
+{name:'Espressor profesional',type:'espressor',cat:'HoReCa',qty:1,val:17500,sp:{grupuri:2,bar:15,boiler:10}},
+{name:'Frigider vertical inox',type:'frigider',cat:'HoReCa',qty:1,val:6900,sp:{volum:550,inox:1}},
+{name:'Cuptor electric cu convecție',type:'cuptor',cat:'HoReCa',qty:1,val:10800,sp:{tavi:6,putere:8}},
+{name:'Vitrină frigorifică pentru prăjituri',type:'vitrina',cat:'HoReCa',qty:1,val:7400,sp:{},txt:['Lungime ≥ 120 cm']},
+{name:'Sistem POS cu imprimantă fiscală',type:'pos',cat:'IT',qty:1,val:3500,sp:{fiscal:1,diag:15}},
+{name:'Laptop',type:'laptop',cat:'IT',qty:1,val:4200,sp:{ram:16,ssd:512,diag:15}},
+{name:'Set mese și scaune',type:'set_mese',cat:'Mobilier',qty:1,val:8000,sp:{locuri:20}}];
+function spTxt(k,v,min){const d=SPEC[k]||[k,''];if(BOOL.includes(k))return d[0]+(v?': da':': nu');return `${d[0]}${min?' ≥ ':' '}${String(v).replace('.',',')}${d[1]?(d[1]==='"'?'':' ')+d[1]:''}`}
+function baseFor(p){return st.base?st.base.find(b=>b.type===p.type):null}
+function fails(p,b){if(!b)return [];return Object.keys(b.sp||{}).filter(k=>!(p.sp&&p.sp[k]!==undefined&&Number(p.sp[k])>=Number(b.sp[k])))}
+function minList(b){return [...Object.keys(b.sp||{}).map(k=>spTxt(k,b.sp[k],true)),...(b.txt||[])]}
+const ICON={IT:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',HoReCa:'<path d="M5 8h11v6a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h2a2 2 0 0 1 0 4h-2M8 3v2M11 3v2"/>',Mobilier:'<path d="M6 11h12v4H6zM7 15v5M17 15v5M8 11V5h8v6"/>',Beauty:'<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M8 15 18 4M16 15 6 4"/>'};
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('ro-RO')+' lei';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId=id=>P.find(p=>p.id===id);
+const st={cat:'Toate',q:'',sort:'rel',cart:{p5:1,p6:1,p8:1,p4:1,p1:1},grant:250000,plan:'',rfq:false,recv:false,sent:false,sup:'horeca',ai:[],base:null};
+let db=null,usr=null,uid=null,names={},remote=[],local=[],live=false;
+const offersAll=()=>db?remote:local;
+
+function toast(m){$('toastMsg').textContent=m;$('toast').hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').hidden=true,6000)}
+$('toastX').onclick=()=>$('toast').hidden=true;
+
+function cartLines(){return Object.keys(st.cart).filter(k=>st.cart[k]>0).map(k=>({p:byId(k),q:st.cart[k]}))}
+function cartTotal(){return cartLines().reduce((a,l)=>a+l.p.price*l.q,0)}
+function resetFlow(){st.rfq=false;st.recv=false;st.sent=false}
+function setQty(id,q){st.cart[id]=Math.max(0,q);if(!st.cart[id])delete st.cart[id];resetFlow();renderAll()}
+function catGroups(){const g={};cartLines().forEach(l=>{(g[l.p.cat]=g[l.p.cat]||[]).push(l)});return Object.keys(g).map(cat=>({cat,lines:g[cat]}))}
+function offersFor(g){const os=CATSUP[g.cat].map((k,si)=>{const s=SUP[k];const lines=g.lines.map(l=>{let p=l.p;const b=baseFor(p);if(si===1&&b){const alt=P.filter(x=>x.type===p.type&&x.price<p.price&&fails(x,b).length).sort((x,y)=>x.price-y.price)[0];if(alt)p=alt}return {name:p.name,pid:p.id,qty:l.q,price:Math.round(p.price*s.f/10)*10,bad:b?fails(p,b):[]}});return {sup:k,lines,net:lines.reduce((a,l)=>a+l.price*l.qty,0),ok:lines.every(l=>!l.bad.length)}});const okn=os.filter(o=>o.ok).map(o=>o.net);const m=Math.min(...okn);let done=false;return os.map(o=>{const w=o.ok&&o.net===m&&!done;if(w)done=true;return {...o,win:w}})}
+const fee=()=>st.plan==='sub'?0:FEE;
+
+function renderBudget(){
+const maxP=st.grant/0.9,used=cartTotal(),left=maxP-used,co=maxP-st.grant;
+$('left').textContent=fmt(left);$('left').classList.toggle('over',left<0);$('mbarVal').textContent=fmt(left);
+const u=Math.min(100,used/maxP*100);
+$('mU').style.width=u+'%';$('mC').style.width=Math.max(0,Math.min(100-u,co/maxP*100))+'%';
+$('legend').innerHTML=`<span>Ales: <b>${fmt(used)}</b></span><span>Proiect maxim: <b>${fmt(maxP)}</b></span><span>Cofinanțarea ta: <b>${fmt(co)}</b></span>`+(left<0?`<span style="color:var(--red)"><b>Ai depășit bugetul cu ${fmt(-left)}</b></span>`:'');
+}
+
+function tagFor(p){if(!st.base)return '<p class="tag">Verificat față de procedură (demo)</p>';const b=baseFor(p);if(!b)return '<p class="small muted">Nu e în lista ta aprobată</p>';const f=fails(p,b);return f.length?`<p class="tag bad">Sub specificațiile aprobate: ${f.map(k=>SPEC[k][0]).join(', ')}</p>`:'<p class="tag">Conform cu oferta de la depunere</p>'}
+function renderCatalog(){
+$('cats').innerHTML=['Toate','IT','HoReCa','Mobilier','Beauty'].map(c=>`<button class="chip" type="button" data-cat="${c}" aria-pressed="${st.cat===c}">${c}</button>`).join('');
+const q=st.q.trim().toLowerCase();
+let list=P.filter(p=>(st.cat==='Toate'||p.cat===st.cat)&&(!q||(p.name+' '+p.cat).toLowerCase().includes(q)));
+if(st.sort==='asc')list=list.slice().sort((a,b)=>a.price-b.price);
+if(st.sort==='desc')list=list.slice().sort((a,b)=>b.price-a.price);
+$('grid').innerHTML=list.length?list.map(p=>{const n=st.cart[p.id]||0;return `<article class="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[p.cat]}</svg><h3>${esc(p.name)}</h3><p class="small muted">3 furnizori verificați</p>${tagFor(p)}<div class="specs">${Object.keys(p.sp).map(k=>`<span class="sp">${esc(spTxt(k,p.sp[k]))}</span>`).join('')}</div><p class="price">de la ${fmt(Math.min(...CATSUP[p.cat].map(k=>Math.round(p.price*SUP[k].f/10)*10)))} <span class="small muted" style="font-weight:400">fără TVA</span></p>${n?`<div class="qty"><button type="button" data-q="${p.id}" data-d="-1" aria-label="Scade ${esc(p.name)}">−</button><output>${n}</output><button type="button" data-q="${p.id}" data-d="1" aria-label="Crește ${esc(p.name)}">+</button><span class="small muted">ales</span></div>`:`<button class="btn" type="button" data-add="${p.id}">Adaugă</button>`}</article>`}).join(''):`<p class="empty" style="grid-column:1/-1">Niciun produs pentru „${esc(st.q)}”. Încearcă alt cuvânt sau categoria Toate.</p>`;
+const lines=cartLines();
+$('fileList').innerHTML=lines.length?lines.map(l=>`<li><span>${l.q} × ${esc(l.p.name)}</span><span class="num">${fmt(l.p.price*l.q)}</span></li>`).join(''):'<li class="muted">Nimic ales încă. Adaugă produse din catalog.</li>';
+$('fileTotal').textContent=fmt(cartTotal());
+const c=lines.reduce((a,l)=>a+l.q,0);$('navCount').textContent=c?`(${c})`:'';
+}
+
+const today='20.11.2026',due='27.11.2026';
+function reqSpecs(p){const b=baseFor(p);return b?minList(b):Object.keys(p.sp).map(k=>spTxt(k,p.sp[k],!BOOL.includes(k)))}
+function hdr(kind,no){return `<div class="hd"><div><b>${esc($('firm').value)}</b><p class="small muted">CUI ${esc($('cui').value)}</p></div><div style="text-align:right"><p class="kind">${kind}</p><p class="small muted">${no}</p></div></div>`}
+function docRFQ(g,k,i){const s=SUP[k];const hasB=g.lines.some(l=>baseFor(l.p));return hdr('Cerere de ofertă',`Nr. CO-${g.cat}-${i+1} din ${today}`)+`<p>Către <b>${s.name}</b>, ${s.city}</p><p>Vă rugăm să ne transmiteți oferta de preț pentru produsele de mai jos, achiziționate în cadrul proiectului finanțat prin ${esc($('prog').value)}.</p><div class="scroll"><table><thead><tr><th>Produs</th><th>Specificații minime obligatorii</th><th class="num">Cantitate</th></tr></thead><tbody>${g.lines.map(l=>`<tr><td>${esc((baseFor(l.p)||l.p).name)}</td><td>${reqSpecs(l.p).map(esc).join('; ')}</td><td class="num">${l.q} buc.</td></tr>`).join('')}</tbody></table></div><p>${hasB?'Specificațiile minime sunt cele din oferta depusă la înscrierea în program. Se acceptă echipamente cu aceeași denumire și caracteristici egale sau superioare. ':''}Echipamentele trebuie să fie noi. Transportul, montajul și instruirea se ofertează separat. Termen de răspuns: ${due}. Criteriul de atribuire: prețul cel mai scăzut dintre ofertele conforme. Oferta va include caracteristicile tehnice, termenul de livrare și garanția.</p><p class="small muted">Administrator, ${esc($('admin').value)}</p>`}
+function docOffer(g,o,i){const s=SUP[o.sup];return `<div class="hd"><div><b>${s.name}</b><p class="small muted">${s.city}</p></div><div style="text-align:right"><p class="kind">Ofertă de preț</p><p class="small muted">Nr. OF-${g.cat}-${i+1} din ${due}</p></div></div><p>Către <b>${esc($('firm').value)}</b>, CUI ${esc($('cui').value)}, ca răspuns la cererea CO-${g.cat}-${i+1}</p><div class="scroll"><table><thead><tr><th>Produs și caracteristici</th><th class="num">Cant.</th><th class="num">Preț unitar</th><th class="num">Valoare</th></tr></thead><tbody>${o.lines.map(l=>{const p=byId(l.pid);return `<tr><td>${esc(l.name)}<br><span class="small muted">${Object.keys(p.sp).map(k=>esc(spTxt(k,p.sp[k]))).join('; ')}</span></td><td class="num">${l.qty}</td><td class="num">${fmt(l.price)}</td><td class="num">${fmt(l.price*l.qty)}</td></tr>`}).join('')}</tbody></table></div><p>Total fără TVA <b>${fmt(o.net)}</b>, TVA 21% ${fmt(o.net*.21)}, total cu TVA <b>${fmt(o.net*1.21)}</b>. Livrare în ${s.del} zile lucrătoare, garanție ${s.war} de luni, valabilitate 30 de zile. Produse noi.</p>`}
+function sv(k,v){if(BOOL.includes(k))return v?'da':'nu';const d=SPEC[k]||['',''];return String(v).replace('.',',')+(d[1]?(d[1]==='"'?'':' ')+d[1]:'')}
+function badTxt(o){return o.lines.filter(l=>l.bad.length).map(l=>{const p=byId(l.pid),b=baseFor(p);return `${l.name}: ${l.bad.map(k=>`${SPEC[k][0].toLowerCase()} ${sv(k,p.sp[k])}, minim ${sv(k,b.sp[k])}`).join('; ')}`}).join('. ')}
+function docNote(g,os){const w=os.find(o=>o.win);const hasB=g.lines.some(l=>baseFor(l.p));const nok=os.filter(o=>!o.ok);return hdr('Proces-verbal de selecție a ofertei',`Categoria ${g.cat}, ${due}`)+`<p>Subsemnatul/a ${esc($('admin').value)}, reprezentant legal al ${esc($('firm').value)}, constat că au fost transmise 3 cereri de ofertă (dovada transmiterii: jurnalul platformei, ${today}) și au fost primite 3 oferte.</p>${hasB?`<p>Ofertele au fost verificate față de specificațiile minime din oferta depusă la înscrierea în program.</p>`:''}<div class="scroll"><table><thead><tr><th>Ofertant</th><th class="num">Total fără TVA</th><th>Conformă</th><th class="num">Livrare</th><th class="num">Garanție</th></tr></thead><tbody>${os.map(o=>`<tr><td>${SUP[o.sup].name}</td><td class="num">${fmt(o.net)}</td><td>${o.ok?'Da':'Nu'}</td><td class="num">${SUP[o.sup].del} zile</td><td class="num">${SUP[o.sup].war} luni</td></tr>`).join('')}</tbody></table></div>${nok.map(o=>`<p>Oferta ${SUP[o.sup].name} se respinge: nu îndeplinește specificațiile minime (${esc(badTxt(o))}).</p>`).join('')}${w?`<p>Se selectează oferta <b>${SUP[w.sup].name}</b>, în valoare de <b>${fmt(w.net)}</b> fără TVA, ca fiind oferta conformă cu prețul cel mai scăzut.</p>`:'<p>Nicio ofertă nu îndeplinește specificațiile minime. Se reia procedura.</p>'}<p>Declar pe propria răspundere că nu există relații de rudenie până la gradul II între asociații firmei și ofertanți și că niciun ofertant nu deține pachetul majoritar în alt ofertant participant (art. 4.3 alin. 3).</p><p class="small muted">Reprezentant legal, ${esc($('admin').value)}. Semnătura: ______________</p>`}
+
+function renderSteps(){const has=cartLines().length>0;const s=[['Proiect aprobat',st.base?'încărcat':'opțional',!!st.base],['Produse',has?'alese':'de ales',has],['3 cereri de ofertă',st.rfq?'generate':'de generat',st.rfq],['3 oferte și comparația',st.recv?'primite':'în așteptare',st.recv],['Comanda',st.sent?'trimisă':'de trimis',st.sent]];const now=s.findIndex(x=>!x[2]);$('steps').innerHTML=s.map((x,i)=>`<li class="${x[2]?'done':i===now?'now':''}" ${i===now?'aria-current="step"':''}><span class="n">${i+1}</span><span class="t">${x[0]}</span><span class="small muted">${x[1]}</span></li>`).join('')}
+
+function bestFor(b){const ok=P.filter(p=>p.type===b.type&&!fails(p,b).length).sort((x,y)=>x.price-y.price);return {ok,bad:P.filter(p=>p.type===b.type&&fails(p,b).length)}}
+function renderProiect(){
+const o=$('baseOut');if(!st.base){o.innerHTML='';return}
+const rows=st.base.map((b,i)=>{const r=bestFor(b),p=r.ok[0];return `<tr><td data-l="Achiziție"><b>${esc(b.name)}</b><br><span class="small muted">${esc(b.cat||'')}</span></td><td data-l="Minim"><div class="specs">${minList(b).map(t=>`<span class="sp">${esc(t)}</span>`).join('')||'<span class="small muted">fără specificații extrase</span>'}</div></td><td class="num" data-l="Cant.">${b.qty}</td><td class="num" data-l="Aprobat">${fmt(b.val)}</td><td data-l="În catalog">${p?`<span class="okt">${r.ok.length} conform${r.ok.length>1?'e':''}</span>, de la ${fmt(p.price)}${r.bad.length?`<br><span class="small badt">${r.bad.length} sub minim, marcat${r.bad.length>1?'e':''} în catalog</span>`:''}`:'<span class="badt">Niciun produs conform</span><br><span class="small muted">cererea pleacă la furnizorii din categorie sau la furnizorul tău</span>'}</td></tr>`}).join('');
+const tot=st.base.reduce((a,b)=>a+b.val,0),inCat=st.base.filter(b=>bestFor(b).ok.length).length;
+o.innerHTML=`<div class="blk"><div class="row" style="justify-content:space-between"><h2>Lista de achiziții aprobată</h2><span class="small muted">${st.base.length} poziții, ${fmt(tot)} fără TVA${st.baseSrc?', din '+esc(st.baseSrc):''}</span></div><div class="scroll"><table class="stack"><thead><tr><th>Achiziție aprobată</th><th>Specificații minime</th><th class="num">Cant.</th><th class="num">Valoare aprobată</th><th>În catalog</th></tr></thead><tbody>${rows}</tbody></table></div><div class="actions"><button class="btn red" type="button" id="takeAll">Preia în dosar: ${inCat} din ${st.base.length} poziții</button><a class="btn ghost" href="#catalog">Vezi catalogul filtrat</a><span class="small muted">Se alege cel mai ieftin produs conform. Îl poți schimba din catalog.</span></div></div>`}
+function confCell(p){if(!st.base)return '<span class="small muted"><a href="#proiect">Încarcă proiectul</a> ca să verificăm</span>';const b=baseFor(p);if(!b)return '<span class="badt">Nu e în lista aprobată</span>';const f=fails(p,b);if(f.length)return `<span class="badt">Sub minim: ${f.map(k=>SPEC[k][0]).join(', ')}</span>`;const over=p.price*1-b.val/(b.qty||1);return `<span class="okt">Conform</span>${over>0?`<br><span class="small muted">peste valoarea aprobată cu ${fmt(over)}/buc., diferența e cofinanțare</span>`:''}`}
+function renderDosar(){
+renderSteps();
+const lines=cartLines(),gs=catGroups();
+if(!lines.length){$('dosarBody').innerHTML=`<div class="empty">Nu ai ales încă produse. <a href="#catalog">Alege din catalog</a> sau cere recomandări asistentului.</div>`;return}
+let h=`<div class="blk"><h2>Produsele, pe categorii</h2><div class="scroll"><table class="stack"><thead><tr><th>Produs</th><th>Față de oferta de la depunere</th><th>Cantitate</th><th class="num">Estimat, fără TVA</th></tr></thead><tbody>${lines.map(l=>`<tr><td data-l="Produs">${esc(l.p.name)}<br><span class="small muted">${l.p.cat}</span></td><td data-l="Conformitate">${confCell(l.p)}</td><td data-l="Cantitate"><div class="qty"><button type="button" data-q="${l.p.id}" data-d="-1" aria-label="Scade">−</button><output>${l.q}</output><button type="button" data-q="${l.p.id}" data-d="1" aria-label="Crește">+</button></div></td><td class="num" data-l="Estimat">${fmt(l.p.price*l.q)}</td></tr>`).join('')}</tbody></table></div><p>${gs.length} ${gs.length===1?'categorie înseamnă un dosar':'categorii înseamnă '+gs.length+' dosare'}: ${gs.length*3} cereri de ofertă și ${gs.length*3} oferte.</p></div>`;
+if(!st.plan){h+=`<div class="blk"><h2>Alege pachetul</h2><div class="plans">
+<div class="plan"><h3>Gratuit</h3><p class="pr">0 lei</p><ul><li>Catalog și buget</li><li>Prețuri orientative</li><li>Asistent de recomandare</li></ul><button class="btn ghost" type="button" disabled>Pachetul curent</button></div>
+<div class="plan pick"><h3>Dosar de achiziție</h3><p class="pr">${FEE} lei <span class="small muted" style="font-weight:400">pe categorie</span></p><ul><li>3 cereri de ofertă, trimise automat</li><li>3 oferte de la furnizori verificați</li><li>Verificare față de oferta de la depunere</li><li>Tabel comparativ și proces-verbal de selecție</li><li>Totul într-un fișier, gata de dosar</li></ul><button class="btn red" type="button" data-plan="dosar">Activează: ${fmt(FEE*gs.length)}</button></div>
+<div class="plan"><h3>Consultant</h3><p class="pr">${SUB} lei <span class="small muted" style="font-weight:400">pe lună</span></p><ul><li>Dosare nelimitate pentru clienții tăi</li><li>Antetul firmei tale de consultanță</li><li>Istoric și export pentru fiecare client</li></ul><button class="btn" type="button" data-plan="sub">Activează abonamentul</button></div>
+</div><p class="small muted">Tarife de test. În demo, activarea nu încasează nimic.</p></div>`}
+else{
+h+=`<div class="blk"><div class="row" style="justify-content:space-between"><h2>Cererile de ofertă</h2><span class="small muted">Pachet activ: ${st.plan==='sub'?'Consultant':'Dosar de achiziție'}</span></div>`;
+if(!st.rfq)h+=`<p class="muted">Platforma pregătește câte 3 cereri de ofertă pentru fiecare categorie, către furnizori diferiți.</p><div class="row"><button class="btn red" type="button" id="genRfq">Generează ${gs.length*3} cereri de ofertă</button></div>`;
+else h+=gs.map(g=>`<div class="catcard"><h3>${g.cat}: 3 cereri trimise</h3><div class="rfqs">${CATSUP[g.cat].map((k,i)=>`<div class="rfq"><b>${SUP[k].name}</b><span class="small muted">${SUP[k].city} · CO-${g.cat}-${i+1}</span><span class="small">${st.recv?'Ofertă primită':'Așteaptă răspuns până la '+due}</span><details><summary>Vezi cererea</summary><div class="docprev">${docRFQ(g,k,i)}</div></details></div>`).join('')}</div></div>`).join('')+(st.recv?'':`<div class="row"><button class="btn" type="button" id="recv">Simulează răspunsurile furnizorilor</button><span class="small muted">În platformă, furnizorii răspund din panoul lor.</span></div>`);
+h+='</div>';
+if(st.recv){h+=`<div class="blk"><h2>Ofertele primite și comparația</h2>`+gs.map((g,gi)=>{const os=offersFor(g);const w=os.find(o=>o.win);const mx=Math.max(...os.filter(o=>o.ok).map(o=>o.net));return `<div class="catcard"><div class="row" style="justify-content:space-between"><h3>${g.cat}: ${w?'câștigă '+SUP[w.sup].name:'nicio ofertă conformă'}</h3>${w?`<span class="small muted">economie față de cea mai scumpă ofertă conformă: <b>${fmt(mx-w.net)}</b></span>`:''}</div><div class="scroll"><table class="stack"><thead><tr><th>Ofertant</th><th class="num">Total fără TVA</th><th class="num">Livrare</th><th class="num">Garanție</th><th>Specificații</th><th>Rezultat</th></tr></thead><tbody>${os.map(o=>`<tr class="${o.win?'win':''}"><td data-l="Ofertant">${SUP[o.sup].name}</td><td class="num" data-l="Total">${fmt(o.net)}</td><td class="num" data-l="Livrare">${SUP[o.sup].del} zile</td><td class="num" data-l="Garanție">${SUP[o.sup].war} luni</td><td data-l="Specificații">${o.ok?'<span class="okt">Conformă</span>':`<span class="badt">Sub minim</span><br><span class="small muted">${esc(badTxt(o))}</span>`}</td><td data-l="Rezultat">${o.win?'Câștigătoare, cel mai mic preț conform':o.ok?'Necâștigătoare':'Respinsă'}</td></tr>`).join('')}</tbody></table></div>${os.map((o,i)=>`<details><summary>Oferta ${SUP[o.sup].name}</summary><div class="docprev">${docOffer(g,o,i)}</div></details>`).join('')}<details><summary>Procesul-verbal de selecție</summary><div class="docprev">${docNote(g,os)}</div></details><div class="actions"><button class="btn ghost" type="button" data-dl="${gi}">Descarcă dosarul ${g.cat}: 3 cereri, 3 oferte, proces-verbal</button></div></div>`}).join('')+`<div class="actions"><button class="btn red" type="button" id="send" ${st.sent?'disabled':''}>${st.sent?'Comenzile au fost trimise':'Trimite comanda către câștigători'}</button><span class="small muted">${st.sent?'Furnizorii câștigători o văd în Panou furnizor.':'Fiecare furnizor câștigător confirmă comanda din panoul lui.'}</span></div></div>`}
+}
+$('dosarBody').innerHTML=h;
+}
+
+function nameOf(id){return id==='demo'?'Exemplu':id?(names[id]||'Un coleg'):'Tu'}
+const norm=s=>s==='trimisa'?'castigata':s;
+function stLabel(s){return {livrata:'Livrată',comandata:'Comandată',castigata:'Câștigată, de confirmat',necastigata:'Necâștigătoare'}[norm(s)]||s}
+function renderFurnizor(){
+const keys=Object.keys(SUP);
+$('supSeg').innerHTML=keys.map(k=>`<button class="chip" type="button" data-sup="${k}" aria-pressed="${st.sup===k}">${SUP[k].name.replace(' SRL','')}</button>`).join('');
+const s=SUP[st.sup],rows=offersAll().filter(o=>o.supplier===st.sup);
+const won=rows.filter(o=>norm(o.status)!=='necastigata'),ord=rows.filter(o=>['comandata','livrata'].includes(o.status)),del=rows.filter(o=>o.status==='livrata');
+const com=del.reduce((a,o)=>a+o.net*s.rate,0);
+$('supStats').innerHTML=[['Cereri de ofertă primite',rows.length],['Oferte câștigate',won.length],['Valoare comenzi',fmt(ord.reduce((a,o)=>a+o.net,0))],[`Comision datorat (${Math.round(s.rate*100)}%)`,fmt(com)]].map(x=>`<div class="stat"><p class="small muted">${x[0]}</p><p class="v">${x[1]}</p></div>`).join('');
+$('supRows').innerHTML=rows.length?rows.map(o=>{const n=norm(o.status);return `<tr><td data-l="Beneficiar">${esc(o.firm)}</td><td data-l="Trimisă de">${esc(nameOf(o.by))}</td><td class="num" data-l="Oferta">${fmt(o.net)}</td><td data-l="Stare"><span class="status s-${n}">${stLabel(n)}</span></td><td class="num" data-l="Comision">${n==='livrata'?fmt(o.net*s.rate):n==='necastigata'?'—':'după livrare'}</td><td data-l="Acțiune">${n==='castigata'?`<button class="btn" type="button" data-st="${o.id}" data-to="comandata">Confirmă comanda</button>`:n==='comandata'?`<button class="btn ghost" type="button" data-st="${o.id}" data-to="livrata">Marchează livrat</button>`:'<span class="muted small">Încheiată</span>'}</td></tr>`}).join(''):`<tr><td colspan="6" class="muted">Nicio cerere de ofertă încă. Trimite un dosar din Dosar de achiziție ca s-o vezi aici.</td></tr>`;
+}
+function renderPlatforma(){
+const all=offersAll(),won=all.filter(o=>norm(o.status)!=='necastigata'),ord=all.filter(o=>['comandata','livrata'].includes(o.status)),del=all.filter(o=>o.status==='livrata');
+const gmv=ord.reduce((a,o)=>a+o.net,0),com=del.reduce((a,o)=>a+o.net*SUP[o.supplier].rate,0),fees=all.reduce((a,o)=>a+(Number(o.fee)||0),0);
+$('platTitle').textContent=all.length?`${ord.length} comenzi din ${all.length} cereri de ofertă`:'Platforma așteaptă primul dosar';
+$('platStats').innerHTML=[['Cereri de ofertă',all.length],['Comenzi',ord.length],['Achiziții intermediate',fmt(gmv)],['Venit din dosare',fmt(fees)],['Comision încasat',fmt(com)]].map(x=>`<div class="stat"><p class="small muted">${x[0]}</p><p class="v">${x[1]}</p></div>`).join('');
+const mx=Math.max(1,all.length);
+$('funnel').innerHTML=[['Cereri de ofertă',all.length],['Oferte câștigate',won.length],['Comandate',ord.length],['Livrate',del.length]].map((x,i)=>`<div class="fr ${i===3?'hot':''}"><span>${x[0]}</span><div class="bar"><i style="width:${x[1]/mx*100}%"></i></div><span class="num">${x[1]}</span></div>`).join('');
+const per=Object.keys(SUP).map(k=>({k,v:all.filter(o=>o.supplier===k&&['comandata','livrata'].includes(o.status)).reduce((a,o)=>a+o.net*SUP[k].rate,0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+const m2=Math.max(1,...per.map(x=>x.v));
+$('bySup').innerHTML=per.length?per.map((x,i)=>`<div class="fr ${i===0?'hot':''}"><span class="small">${SUP[x.k].name.replace(' SRL','')}</span><div class="bar"><i style="width:${x.v/m2*100}%"></i></div><span class="num small">${fmt(x.v)}</span></div>`).join(''):'<p class="muted">Niciun comision încă.</p>';
+$('liveNote').textContent=db?(live?'Date comune, actualizate live pentru toți colegii conectați.':'Se încarcă datele comune…'):'În această vizualizare datele rămân doar la tine.';
+}
+function renderAll(){renderBudget();renderProiect();renderCatalog();renderDosar();renderFurnizor();renderPlatforma()}
+
+function route(){const v=(location.hash||'#catalog').slice(1);const ok=['proiect','catalog','dosar','furnizor','platforma'].includes(v)?v:'catalog';
+for(const s of document.querySelectorAll('.view'))s.hidden=s.id!=='v-'+ok;
+for(const a of document.querySelectorAll('nav a')){if(a.getAttribute('href')==='#'+ok)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')}
+window.scrollTo(0,0)}
+window.addEventListener('hashchange',route);
+
+document.addEventListener('click',async e=>{
+const t=e.target.closest('button');if(!t)return;
+if(t.dataset.cat){st.cat=t.dataset.cat;renderCatalog()}
+else if(t.dataset.add){setQty(t.dataset.add,1);toast(byId(t.dataset.add).name+' a fost adăugat.')}
+else if(t.dataset.q){setQty(t.dataset.q,(st.cart[t.dataset.q]||0)+Number(t.dataset.d))}
+else if(t.dataset.sup){st.sup=t.dataset.sup;renderFurnizor()}
+else if(t.dataset.plan){st.plan=t.dataset.plan;renderDosar();toast(st.plan==='sub'?'Abonamentul Consultant este activ (demo).':'Pachetul Dosar de achiziție este activ (demo).')}
+else if(t.id==='genRfq'){st.rfq=true;renderDosar();toast(`Au fost generate ${catGroups().length*3} cereri de ofertă.`)}
+else if(t.id==='recv'){st.recv=true;renderDosar();toast('Au sosit ofertele. Câștigătoarea e marcată în fiecare tabel.')}
+else if(t.dataset.dl!==undefined){download(Number(t.dataset.dl))}
+else if(t.id==='send'){send()}
+else if(t.id==='useEx'){$('baseText').value=EXTEXT;setBase(EXBASE.map(b=>({...b})),'oferta nr. 118 (exemplu)');toast('Am extras 7 achiziții din oferta de la depunere.')}
+else if(t.id==='extract'){extract()}
+else if(t.id==='takeAll'){const c={};st.base.forEach(b=>{const p=bestFor(b).ok[0];if(p)c[p.id]=(c[p.id]||0)+b.qty});st.cart=c;resetFlow();renderAll();location.hash='#dosar';toast('Produsele conforme au fost preluate în dosar.')}
+else if(t.dataset.st){setStatus(t.dataset.st,t.dataset.to,t)}
+else if(t.dataset.aiadd){setQty(t.dataset.aiadd,(st.cart[t.dataset.aiadd]||0)+Number(t.dataset.n||1));toast('Adăugat.')}
+else if(t.id==='aiAll'){st.ai.forEach(r=>{st.cart[r.id]=(st.cart[r.id]||0)+r.qty});resetFlow();renderAll();toast('Toate recomandările au fost adăugate.')}
+});
+$('q').addEventListener('input',e=>{st.q=e.target.value;renderCatalog()});
+$('sort').addEventListener('change',e=>{st.sort=e.target.value;renderCatalog()});
+$('grant').addEventListener('input',e=>{st.grant=Math.max(0,Number(e.target.value)||0);renderBudget()});
+for(const id of['firm','cui','prog','admin'])$(id).addEventListener('change',()=>renderDosar());
+
+function setBase(items,src){st.base=items;st.baseSrc=src;renderAll()}
+$('upFiles').addEventListener('change',e=>{const fs=[...e.target.files];$('upList').innerHTML=fs.map(f=>`<li>${esc(f.name)} <span class="muted">(${f.type.startsWith('image/')?'va fi citit':'PDF: în demo, copiază textul sau fă o captură'})</span></li>`).join('')});
+async function extract(){
+const text=$('baseText').value.trim();const imgs=[...$('upFiles').files].filter(f=>f.type.startsWith('image/'));
+if(!text&&!imgs.length){$('exState').textContent='Lipește textul ofertei sau încarcă o poză a ei.';return}
+const sample=await cuse('sample');
+if(!sample){$('exState').textContent='Asistentul nu e disponibil aici. Are nevoie de un cont Claude. Folosește exemplul.';return}
+let useImgs=[];if(imgs.length){try{const l=await sample.limits();if(l&&l.images)useImgs=imgs.slice(0,4)}catch(e){}}
+$('extract').disabled=true;$('exState').textContent='Citesc documentul…';
+const keys=Object.keys(SPEC).map(k=>`${k} (${SPEC[k][0]}${SPEC[k][1]?', '+SPEC[k][1]:''}${BOOL.includes(k)?', 1=da':''})`).join('; ');
+const prompt=`Extragi lista de achiziții dintr-o ofertă de preț sau o decizie de finanțare depusă în programul Start-Up Nation (România). Pentru fiecare echipament: denumirea, categoria (IT, HoReCa, Mobilier, Beauty sau Altele), tipul (unul din: ${TYPES.join(', ')}, altfel "altul"), cantitatea, valoarea fără TVA în lei (total pe poziție), specificațiile minime ca numere în cheile permise: ${keys}. Specificațiile care nu se potrivesc cu nicio cheie le pui ca text scurt în "txt". Nu inventa specificații care nu apar.
+Răspunde doar cu JSON: {"items":[{"name":"","cat":"","type":"","qty":1,"val":0,"sp":{"cheie":0},"txt":[""]}]}
+${text?'Text:\n"""'+text.slice(0,8000)+'"""':'Documentul e în imaginile atașate.'}`;
+try{const r=await sample.json(prompt,{modelTier:'default',...(useImgs.length?{images:useImgs}:{})});
+const items=(r&&Array.isArray(r.items)?r.items:[]).slice(0,30).map(x=>{const sp={};Object.entries(x.sp||{}).forEach(([k,v])=>{if(SPEC[k]&&isFinite(Number(v)))sp[k]=Number(v)});return {name:String(x.name||'Echipament'),cat:String(x.cat||''),type:TYPES.includes(x.type)?x.type:'altul',qty:Math.max(1,Math.round(Number(x.qty)||1)),val:Math.max(0,Number(x.val)||0),sp,txt:Array.isArray(x.txt)?x.txt.filter(Boolean).map(String).slice(0,4):[]}});
+if(!items.length){$('exState').textContent='Nu am găsit echipamente în document. Verifică textul sau încearcă exemplul.';return}
+setBase(items,useImgs.length?'imaginile încărcate':'textul lipit');$('exState').textContent='';toast(`Am extras ${items.length} achiziții. Verifică specificațiile înainte de a continua.`)}
+catch(err){$('exState').textContent=err&&err.code==='rate_limited'?'Prea multe cereri. Încearcă peste un minut.':err&&err.code==='not_granted'?'Asistentul nu a primit acordul de a rula.':'Nu am putut citi documentul. Încearcă din nou sau folosește exemplul.'}
+finally{$('extract').disabled=false}}
+async function download(i){
+const g=catGroups()[i];if(!g)return;
+const dl=await cuse('downloads');
+
+const os=offersFor(g);
+const parts=[...CATSUP[g.cat].map((k,j)=>docRFQ(g,k,j)),...os.map((o,j)=>docOffer(g,o,j)),docNote(g,os)];
+const doc=`<!DOCTYPE html><html lang="ro"><head><meta charset="utf-8"><title>Dosar de achiziție ${g.cat}</title><style>body{font:14px/1.5 Arial,sans-serif;max-width:780px;margin:32px auto;color:#111}section{padding-bottom:32px;margin-bottom:32px;border-bottom:1px dashed #999;page-break-after:always;display:grid;gap:10px}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #ccc;padding:6px 8px;text-align:left}.num{text-align:right}.hd{display:flex;justify-content:space-between;border-bottom:3px solid #111;padding-bottom:8px}.kind{color:#e4002b;font-weight:700;margin:0}p{margin:0}.small{font-size:12px}.muted{color:#555}</style></head><body>${parts.map(p=>`<section>${p}</section>`).join('')}</body></html>`;
+if(!dl){const u=URL.createObjectURL(new Blob([doc],{type:'text/html'}));const x=document.createElement('a');x.href=u;x.download=`dosar-achizitie-${g.cat.toLowerCase()}.html`;document.body.appendChild(x);x.click();x.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Dosarul a fost descărcat. Deschide-l în browser și salvează-l ca PDF.');return}
+try{await dl.save({filename:`dosar-achizitie-${g.cat.toLowerCase()}.html`,data:doc});toast('Dosarul a fost descărcat. Deschide-l în browser și salvează-l ca PDF.')}catch(err){if(err&&err.code!=='declined')toast('Dosarul nu a putut fi descărcat acum.')}
+}
+
+async function send(){
+const firm=$('firm').value.trim()||'Firmă fără nume',now=Date.now(),f=fee();
+const rows=[];catGroups().forEach(g=>{const grp='g'+now+g.cat;offersFor(g).forEach((o,i)=>rows.push({firm,cui:$('cui').value,program:$('prog').value,cat:g.cat,group:grp,supplier:o.sup,net:o.net,no:`OF-${g.cat}-${i+1}`,lines:o.lines,status:o.win?'castigata':'necastigata',fee:o.win?f:0,by:uid,createdAt:now}))});
+if(db){$('send').disabled=true;try{for(const r of rows)await db.collection('offers').add(r);st.sent=true;renderDosar();toast('Comenzile au plecat la furnizorii câștigători. Colegii le văd acum în Panou furnizor.')}catch(err){$('send').disabled=false;toast(err&&err.code==='quota_exceeded'?'Spațiul de date e plin. Șterge dosare vechi și încearcă din nou.':'Comanda nu a putut fi trimisă. Ai nevoie de drept de Contributor pe pagină.')}}
+else{rows.forEach((r,i)=>local.unshift({...r,id:'l'+now+i}));st.sent=true;renderAll();toast('Comenzile au fost trimise (doar în această vizualizare).')}
+}
+
+async function setStatus(id,to,btn){
+if(db){btn.disabled=true;try{await db.doc('offers/'+id).update({status:to,updatedAt:Date.now()});toast(to==='livrata'?'Livrare înregistrată. Comisionul a intrat în calcul.':'Comanda a fost confirmată.')}catch(err){btn.disabled=false;toast('Starea nu a putut fi schimbată acum.')}}
+else{const o=local.find(x=>x.id===id);if(o){o.status=to;renderFurnizor();renderPlatforma()}}
+}
+
+$('aiGo').addEventListener('click',async()=>{
+const text=$('aiText').value.trim();if(!text){$('aiState').textContent='Scrie întâi câteva cuvinte despre afacere.';return}
+const sample=await cuse('sample');
+if(!sample){$('aiState').textContent='Asistentul nu e disponibil în această vizualizare. Are nevoie de un cont Claude.';return}
+$('aiGo').disabled=true;$('aiState').textContent='Caut în catalog…';
+const cat=P.map(p=>`${p.id} | ${p.name} | ${p.cat} | ${p.price} lei`).join('\n');
+const prompt=`Ești asistentul unei platforme care vinde echipamente firmelor finanțate prin fonduri nerambursabile din România.\nCatalog (id | produs | categorie | preț fără TVA):\n${cat}\n\nDescrierea afacerii:\n"""${text}"""\n\nAlege între 3 și 6 produse DOAR din catalog, potrivite afacerii, cu o cantitate rezonabilă. Pentru fiecare dă un motiv scurt în română (maxim 15 cuvinte). Răspunde doar cu JSON: {"items":[{"id":"p1","qty":1,"motiv":"..."}],"rezumat":"o propoziție în română"}`;
+try{const r=await sample.json(prompt,{modelTier:'quick'});const items=(r&&Array.isArray(r.items)?r.items:[]).filter(x=>byId(x.id)).slice(0,6).map(x=>({id:x.id,qty:Math.max(1,Math.min(20,Math.round(Number(x.qty)||1))),motiv:String(x.motiv||'')}));
+st.ai=items;
+$('aiOut').innerHTML=items.length?`<p>${esc(r.rezumat||'')}</p>`+items.map(x=>{const p=byId(x.id);return `<div class="airow"><div><b>${x.qty} × ${esc(p.name)}</b><p class="small muted">${esc(x.motiv)} · ${fmt(p.price*x.qty)}</p></div><button class="btn ghost" type="button" data-aiadd="${p.id}" data-n="${x.qty}">Adaugă</button></div>`}).join('')+`<div class="row"><button class="btn" type="button" id="aiAll">Adaugă toate</button></div>`:'<p class="muted">Nu am găsit produse potrivite în catalog. Încearcă o descriere mai concretă.</p>';
+$('aiState').textContent='';}
+catch(err){$('aiState').textContent=err&&err.code==='rate_limited'?'Prea multe cereri. Încearcă din nou peste un minut.':err&&err.code==='not_granted'?'Asistentul nu a primit acordul de a rula.':'Asistentul nu a răspuns. Încearcă din nou.'}
+finally{$('aiGo').disabled=false}
+});
+
+async function resolveNames(){if(!usr)return;const ids=[...new Set(offersAll().map(o=>o.by).filter(b=>b&&b!=='demo'))].filter(i=>!(i in names));if(!ids.length)return;try{const ps=await usr.profiles(ids);ids.forEach(i=>names[i]=(ps[i]&&ps[i].name)||'Un coleg');renderFurnizor()}catch(e){}}
+
+async function boot(){
+route();renderAll();
+usr=await cuse('user');
+if(usr){try{uid=await usr.id();const me=await usr.me();if(me&&me.name)$('who').textContent='Conectat: '+me.name}catch(e){}}
+db=await cuse('db');
+if(!db){const d=document.querySelector('.demo');if(d)d.textContent='Prototip demonstrativ: furnizorii, produsele, prețurile, comisioanele și tarifele sunt fictive. Datele introduse rămân doar în browserul tău.';renderPlatforma();return}
+const timer=setTimeout(()=>{if(!live)$('liveNote').textContent='Datele comune nu răspund încă; ce vezi poate fi incomplet.'},10000);
+const unsub=db.collection('offers').orderBy('createdAt','desc').limit(300).onSnapshot(snap=>{remote=snap.docs.map(d=>({id:d.id,...d.data()})).filter(o=>SUP[o.supplier]&&typeof o.net==='number');if(!snap.metadata.fromCache){live=true;clearTimeout(timer)}renderFurnizor();renderPlatforma();resolveNames()},err=>{clearTimeout(timer);$('liveNote').textContent='Datele comune nu sunt disponibile acum.'});
+window.addEventListener('pagehide',()=>unsub());
+}
+boot();
+}
+</script>
+</body>
+</html>
