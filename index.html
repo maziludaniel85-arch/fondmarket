@@ -148,6 +148,27 @@ summary{cursor:pointer;font-weight:600;min-height:32px}
 .okt{color:var(--stamp);font-weight:600}.badt{color:var(--red);font-weight:600}
 .drop{border:2px dashed var(--folder);background:var(--sheet);padding:22px;display:grid;gap:12px}
 .rule{border-left:4px solid var(--stamp);background:var(--sheet);padding:12px 16px;max-width:76ch}
+/* isometric workshop */
+.atelier{position:relative;height:330px;margin:-20px -22px 14px;background:var(--folder2);overflow:hidden;perspective:1400px;touch-action:pan-y}
+.isoWrap{position:absolute;left:50%;top:54%;width:0;height:0}
+.iso{position:absolute;left:-120px;top:-120px;width:240px;height:240px;transform-style:preserve-3d;transform:rotateX(var(--rx,58deg)) rotateZ(var(--rz,45deg));transition:transform .35s ease-out;
+background:var(--sheet);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;outline:1px solid var(--line);box-shadow:0 0 0 10px color-mix(in srgb,var(--folder) 60%,transparent)}
+.blk3{position:absolute;transform-style:preserve-3d;cursor:pointer;border:0;padding:0;background:none}
+.blk3 .t,.blk3 .s1,.blk3 .s2{position:absolute;display:flex;align-items:center;justify-content:center}
+.blk3 .t{inset:0;transform:translateZ(var(--h));background:var(--c);font:800 12px/1 "Bricolage Grotesque",sans-serif;color:#16202a;flex-direction:column;gap:1px}.blk3 .t svg{width:18px;height:18px;stroke:#16202a;opacity:.75}
+.blk3 .s1{left:0;bottom:0;width:100%;height:var(--h);transform-origin:bottom;transform:rotateX(-90deg);background:color-mix(in srgb,var(--c) 78%,#16202a)}
+.blk3 .s2{right:0;top:0;width:var(--h);height:100%;transform-origin:right;transform:rotateY(90deg);background:color-mix(in srgb,var(--c) 62%,#16202a)}
+.blk3:hover .t,.blk3:focus-visible .t{outline:3px solid var(--stamp);outline-offset:-3px}
+.blk3:focus-visible{outline:none}
+.blk3.bad .t{background-image:repeating-linear-gradient(45deg,transparent 0 6px,color-mix(in srgb,var(--red) 45%,transparent) 6px 9px)}
+.ghost3{position:absolute;border:2px dashed var(--stamp);background:color-mix(in srgb,var(--stamp) 8%,transparent);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--stamp);font-weight:700;text-align:center;line-height:1.1;padding:2px}
+.floorlbl{position:absolute;left:0;bottom:-26px;font-size:11px;color:var(--grey);white-space:nowrap;transform:none}
+.tip{position:absolute;z-index:3;pointer-events:none;background:var(--sheet);border:1px solid var(--line);padding:8px 10px;font-size:13px;max-width:220px;display:grid;gap:4px;transform:translate(-50%,calc(-100% - 12px))}
+.tip[hidden]{display:none}
+.athint{position:absolute;left:14px;bottom:10px;margin:0}@media(hover:none){.athint{display:none}}
+.atl{position:absolute;left:14px;top:12px;right:14px;margin:0;color:var(--ink)}
+@media(prefers-reduced-motion:no-preference){.blk3.drop{animation:drop .75s cubic-bezier(.3,1.4,.5,1) backwards}@keyframes drop{0%{transform:translateZ(320px)}100%{transform:translateZ(0)}}}
+@media(max-width:720px){.atelier{height:250px}.isoWrap{transform:scale(.82)}}
 /* the stamp */
 .stamp{display:inline-block;font:800 12px/1 "Bricolage Grotesque",sans-serif;font-stretch:90%;letter-spacing:.08em;text-transform:uppercase;color:var(--stamp);border:2px solid currentColor;border-radius:4px;padding:5px 8px 4px;transform:rotate(-4deg);opacity:.9;white-space:nowrap;box-shadow:inset 0 0 0 1px color-mix(in srgb,currentColor 35%,transparent)}
 .stamp.no{color:var(--red);transform:rotate(3deg)}
@@ -215,6 +236,12 @@ summary{cursor:pointer;font-weight:600;min-height:32px}
 </div>
 </div>
 <div class="budget" aria-live="polite">
+<div class="atelier" id="atelier" aria-label="Atelierul tău: echipamentele alese, în 3D">
+<div class="isoWrap"><div class="iso" id="iso"><div class="floorlbl" id="floorLbl"></div></div></div>
+<div class="tip" id="tip" hidden></div>
+<p class="atl small" id="atl"></p>
+<p class="small muted athint">Mișcă mouse-ul peste atelier. Click pe un obiect te duce la categoria lui.</p>
+</div>
 <p class="small muted">Rămas din proiect, fără TVA</p>
 <p class="big" id="left"></p>
 <div class="meter" aria-hidden="true"><i class="u" id="mU"></i><i class="c" id="mC"></i></div>
@@ -380,6 +407,20 @@ $('legend').innerHTML=`<span>Ales: <b>${fmt(used)}</b></span><span>Proiect maxim
 }
 
 function tagFor(p){if(!st.base)return '<p class="tag">Verificat față de procedură (demo)</p>';const b=baseFor(p);if(!b)return '<p class="small muted">Nu e în lista ta aprobată</p>';const f=fails(p,b);return f.length?`<span class="stamp no">Sub minim</span><p class="tag badt">Sub oferta de la depunere: ${f.map(k=>SPEC[k][0].toLowerCase()).join(', ')}</p>`:'<span class="stamp">Conform</span><p class="tag">Îndeplinește oferta de la depunere</p>'}
+const DIM={laptop:[1,1,10],multifunctionala:[1,1,28],monitor:[1,1,26],pos:[1,1,18],espressor:[2,1,34],frigider:[1,1,72],masina_vase:[1,1,44],cuptor:[2,1,40],birou:[2,1,22],scaun_birou:[1,1,30],receptie:[3,1,32],set_mese:[2,2,20],scaun_coafor:[1,1,34],spalator:[2,1,30],pat_cosmetica:[2,1,24],vitrina:[2,1,36],altul:[1,1,20]};
+const CCOL={HoReCa:'#7cc9b4',IT:'#a3acef',Mobilier:'#dcb98f',Beauty:'#eaa9c3'};
+const seen3=new Set();
+function renderScene(){const iso=$('iso');if(!iso)return;const N=6,C=40,occ=Array.from({length:N},()=>Array(N).fill(0));
+const fit=(w,d)=>{for(let y=0;y<=N-d;y++)for(let x=0;x<=N-w;x++){let ok=true;for(let j=0;j<d&&ok;j++)for(let i=0;i<w;i++)if(occ[y+j][x+i]){ok=false;break}if(ok){for(let j=0;j<d;j++)for(let i=0;i<w;i++)occ[y+j][x+i]=1;return [x,y]}}return null};
+const lines=cartLines().slice().sort((a,b)=>(DIM[b.p.type]||[1,1])[0]*(DIM[b.p.type]||[1,1])[1]-(DIM[a.p.type]||[1,1])[0]*(DIM[a.p.type]||[1,1])[1]);
+let html='',over=0,k=0;const now=new Set();
+lines.forEach(l=>{const [w,d,h]=DIM[l.p.type]||DIM.altul;const pos=fit(w,d);if(!pos){over++;return}const b=baseFor(l.p),bad=b&&fails(l.p,b).length;now.add(l.p.id);
+html+=`<button type="button" class="blk3${bad?' bad':''}${seen3.has(l.p.id)?'':' drop'}" data-b3="${l.p.id}" aria-label="${esc(l.p.name)}, ${l.q} buc." style="animation-delay:${seen3.has(l.p.id)?0:(k++)*110}ms;left:${pos[0]*C+3}px;top:${pos[1]*C+3}px;width:${w*C-6}px;height:${d*C-6}px;--h:${h}px;--c:${CCOL[l.p.cat]||'#bbb'}"><span class="t"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[l.p.cat]}</svg>${l.q>1?'×'+l.q:''}</span><span class="s1"></span><span class="s2"></span></button>`});
+let ghosts=0;if(st.base){st.base.forEach(b=>{if(lines.some(l=>l.p.type===b.type))return;const [w,d]=DIM[b.type]||DIM.altul;const pos=fit(w,d);if(!pos)return;ghosts++;html+=`<div class="ghost3" style="left:${pos[0]*C+3}px;top:${pos[1]*C+3}px;width:${w*C-6}px;height:${d*C-6}px" title="${esc(b.name)}">${esc(b.name.split(' ')[0])}</div>`})}
+iso.innerHTML=html+`<div class="floorlbl" id="floorLbl"></div>`;seen3.clear();now.forEach(i=>seen3.add(i));
+const n=lines.reduce((a,l)=>a+l.q,0);
+$('atl').innerHTML=n?`<b>Atelierul tău:</b> ${n} echipament${n>1?'e':''}${over?`, plus ${over} care nu mai încap în imagine`:''}${ghosts?`. Locurile punctate sunt achiziții aprobate încă nealese.`:''}`:(ghosts?`<b>Atelierul tău e gol.</b> Locurile punctate sunt achizițiile aprobate. Adaugă produse din catalog.`:`<b>Atelierul tău e gol.</b> Adaugă un produs și îl vezi aici.`)}
+function showTip(id,x,y){const l=cartLines().find(l=>l.p.id===id);if(!l)return;const b=baseFor(l.p),f=b?fails(l.p,b):[];const r=$('atelier').getBoundingClientRect();const t=$('tip');t.innerHTML=`<b>${esc(l.p.name)}</b><span class="muted">${l.q} × ${fmt(l.p.price)}</span>${st.base?(b?(f.length?'<span class="stamp no">Sub minim</span>':'<span class="stamp">Conform</span>'):'<span class="small muted">Nu e în lista aprobată</span>'):''}`;t.style.left=Math.min(Math.max(x-r.left,110),r.width-110)+'px';t.style.top=(y-r.top)+'px';t.hidden=false}
 function renderCatalog(){
 $('cats').innerHTML=['Toate','IT','HoReCa','Mobilier','Beauty'].map(c=>`<button class="chip" type="button" data-cat="${c}" aria-pressed="${st.cat===c}">${c}</button>`).join('');
 const q=st.q.trim().toLowerCase();
@@ -390,7 +431,7 @@ $('grid').innerHTML=list.length?list.map(p=>{const n=st.cart[p.id]||0;return `<a
 const lines=cartLines();
 $('fileList').innerHTML=lines.length?lines.map(l=>`<li><span>${l.q} × ${esc(l.p.name)}</span><span class="num">${fmt(l.p.price*l.q)}</span></li>`).join(''):'<li class="muted">Nimic ales încă. Adaugă produse din catalog.</li>';
 $('fileTotal').textContent=fmt(cartTotal());
-const c=lines.reduce((a,l)=>a+l.q,0);$('navCount').textContent=c?`(${c})`:'';
+const c=lines.reduce((a,l)=>a+l.q,0);$('navCount').textContent=c?`(${c})`:'';renderScene();
 }
 
 const today='20.11.2026',due='27.11.2026';
@@ -505,6 +546,12 @@ if(!items.length){$('exState').textContent='Nu am găsit echipamente în documen
 setBase(items,useImgs.length?'imaginile încărcate':'textul lipit');$('exState').textContent='';toast(`Am extras ${items.length} achiziții. Verifică specificațiile înainte de a continua.`)}
 catch(err){$('exState').textContent=err&&err.code==='rate_limited'?'Prea multe cereri. Încearcă peste un minut.':err&&err.code==='not_granted'?'Asistentul nu a primit acordul de a rula.':'Nu am putut citi documentul. Încearcă din nou sau folosește exemplul.'}
 finally{$('extract').disabled=false}}
+{const at=$('atelier'),iso=$('iso');
+at.addEventListener('pointermove',e=>{const r=at.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;iso.style.setProperty('--rz',(45+x*22)+'deg');iso.style.setProperty('--rx',(58-y*14)+'deg');const b=e.target.closest('[data-b3]');if(b)showTip(b.dataset.b3,e.clientX,e.clientY);else $('tip').hidden=true});
+at.addEventListener('pointerleave',()=>{iso.style.removeProperty('--rz');iso.style.removeProperty('--rx');$('tip').hidden=true});
+at.addEventListener('focusin',e=>{const b=e.target.closest('[data-b3]');if(b){const r=b.getBoundingClientRect();showTip(b.dataset.b3,r.left+r.width/2,r.top)}});
+at.addEventListener('focusout',()=>$('tip').hidden=true);
+at.addEventListener('click',e=>{const b=e.target.closest('[data-b3]');if(!b)return;const p=byId(b.dataset.b3);st.cat=p.cat;st.q='';$('q').value='';renderCatalog();$('grid').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})})}
 async function download(i){
 const g=catGroups()[i];if(!g)return;
 const dl=await cuse('downloads');
