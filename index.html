@@ -4,144 +4,158 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FondMarket demo</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Public+Sans:wght@400..700&display=swap">
 <style>
-/* VOICE work: a procurement tool for grant-funded firms, shown to colleagues; looks like a shipped product
-   IDEA the beneficiary's grant budget as a timetable board, and the procurement file as numbered stations: products, 3 requests, 3 offers, order
-   PICTURE the live budget readout + meter at top; in the file view, the 3-offer comparison with the winner marked
-   COLOUR white, black, signal red #e4002b for what matters, one grey; night #0e0e0e
-   TYPE Archivo wide 800 for numerals and titles + Archivo for text
-   LAYOUT laptop: thick top rule, title left / huge budget numeral right, catalog + sticky file; phone: title, budget, catalog, slim sticky budget bar */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e0e0e);--ink:light-dark(#111111,#f1f1f1);--grey:light-dark(#5f5f5f,#a3a3a3);--line:light-dark(#d9d9d9,#2c2c2c);--panel:light-dark(#f3f3f3,#181818);--red:light-dark(#e4002b,#ff4d63);--ok:light-dark(#1d6b35,#58c27d)}
+/* SUBJECT procurement files for grant-funded firms. VERNACULAR the cardboard "dosar cu șină", divider tabs, ink stamps.
+   BOLD ONE THING stamps (CONFORM / RESPINS) + folder-tab navigation; everything else quiet sheets on cool paper. */
+:root{color-scheme:light dark;
+--paper:light-dark(#eef3f6,#10151a);--sheet:light-dark(#ffffff,#182028);--ink:light-dark(#16202a,#e8eef2);--grey:light-dark(#566673,#9aabb8);
+--line:light-dark(#c9d6df,#2c3843);--folder:light-dark(#a9cde3,#23465d);--folder2:light-dark(#d6e7f1,#1c3546);
+--stamp:light-dark(#3b2fa8,#a49dff);--red:light-dark(#c8102e,#ff6b7d);--ok:var(--stamp)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,Arial,sans-serif;overflow-x:clip}
-a{color:inherit}
+body{background:var(--paper);color:var(--ink);font:16px/1.6 "Public Sans",Arial,sans-serif;overflow-x:clip}
+a{color:inherit;text-underline-offset:3px}
 button,input,textarea,select{font:inherit;color:inherit}
-:focus-visible{outline:3px solid var(--red);outline-offset:2px}
-.wrap{max-width:1240px;margin:0 auto;padding-left:max(4vw,16px);padding-right:max(4vw,16px)}
-.top{border-top:8px solid var(--ink);border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:5}
-.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
-.brand{display:flex;align-items:baseline;gap:10px}
-.brand b{font-size:24px;font-weight:800;font-stretch:112%;letter-spacing:-.02em}
-.brand span{font-size:13px;color:var(--grey)}
-nav{display:flex;flex-wrap:wrap;gap:4px}
-nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;text-decoration:none;font-weight:600;border-bottom:3px solid transparent}
-nav a[aria-current=page]{border-bottom-color:var(--red)}
-.who{font-size:13px;color:var(--grey)}
-.demo{font-size:13px;color:var(--grey);padding-block:8px;border-bottom:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(4vw,16px);padding-right:max(4vw,16px)}
+/* header: cardboard band with divider tabs */
+.top{background:var(--folder);position:sticky;top:0;z-index:5}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 20px;padding-top:14px}
+.brand{display:flex;align-items:baseline;gap:10px;padding-bottom:14px}
+.brand b{font:800 26px/1 "Bricolage Grotesque",sans-serif;font-stretch:88%;letter-spacing:-.02em}
+.brand span{font-size:13px;color:var(--ink);opacity:.7}
+nav{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end}
+nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;text-decoration:none;font-weight:600;font-size:15px;background:var(--folder2);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;position:relative;top:1px}
+nav a:hover{background:var(--sheet)}
+nav a[aria-current=page]{background:var(--paper);border-color:var(--paper);min-height:50px}
+.who{font-size:13px;width:100%;margin:0;text-align:right;order:3}
+.who:empty{display:none}
+.demo{font-size:13px;color:var(--grey);padding-block:10px}
 .view[hidden]{display:none}
-h1,h2,h3{margin:0;letter-spacing:-.02em;line-height:1.05}
-h1{font-size:clamp(32px,4.4vw,48px);font-weight:800;font-stretch:112%;text-wrap:balance}
-h2{font-size:clamp(24px,2.6vw,30px);font-weight:800;font-stretch:108%}
-h3{font-size:17px;font-weight:700;line-height:1.25}
+h1,h2,h3{margin:0;font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.02em;line-height:1.05}
+h1{font-size:clamp(34px,4.6vw,56px);font-weight:800;font-stretch:85%;text-wrap:balance}
+h2{font-size:clamp(23px,2.4vw,30px);font-weight:700;font-stretch:90%}
+h3{font-size:18px;font-weight:700;line-height:1.25}
 p{margin:0}
 .muted{color:var(--grey)}
 .small{font-size:13px}
-.lead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(24px,4vw,56px);padding-block:clamp(28px,4vw,48px);align-items:end}
-.lead p{max-width:60ch;margin-top:12px;color:var(--grey)}
-.budget{border-top:4px solid var(--ink);padding-top:12px}
-.big{font-size:clamp(40px,9vw,112px);font-weight:800;font-stretch:118%;line-height:.95;letter-spacing:-.03em;white-space:nowrap;font-variant-numeric:tabular-nums}
-.big.over{color:var(--red)}
-.meter{display:flex;height:18px;background:var(--panel);margin-top:14px}
+.lead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);padding-block:clamp(24px,4vw,48px);align-items:end}
+.lead p{max-width:58ch;margin-top:14px;color:var(--grey)}
+.lead p a{color:var(--stamp)}
+/* budget: the folder cover label */
+.budget{background:var(--sheet);border:1px solid var(--line);border-top:10px solid var(--folder);padding:20px 22px;position:relative}
+.big{font:800 clamp(44px,8.5vw,104px)/.95 "Bricolage Grotesque",sans-serif;font-stretch:80%;letter-spacing:-.03em;white-space:nowrap;font-variant-numeric:tabular-nums;margin-top:4px}
+.lead .budget p{margin-top:0;max-width:none}.lead .big{color:var(--ink);margin-top:6px}.lead .big.over{color:var(--red)}
+.meter{display:flex;height:14px;background:var(--folder2);margin-top:16px;border-radius:7px;overflow:hidden}
 .meter i{display:block;height:100%}
 .meter .u{background:var(--ink)}
-.meter .c{background:var(--red)}
+.meter .c{background:var(--stamp)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:13px;color:var(--grey)}
 .legend b{color:var(--ink);font-weight:600;white-space:nowrap}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:14px;font-weight:600}
-input,textarea,select{min-height:44px;border:1px solid var(--line);background:var(--bg);padding:8px 12px;font-size:16px;border-radius:0}
+input,textarea,select{min-height:44px;border:1px solid var(--line);background:var(--sheet);padding:8px 12px;font-size:16px;border-radius:6px}
+input[type=file]{padding:9px}
 textarea{min-height:88px;resize:vertical}
-.grantrow{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:16px}
+.grantrow{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-top:18px}
 .grantrow .field{width:200px}
-.btn{min-height:44px;padding:0 18px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn{min-height:44px;padding:0 18px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;border-radius:6px}
 .btn.ghost{background:transparent;color:var(--ink)}
-.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn.red{background:var(--stamp);border-color:var(--stamp);color:#fff}
+.btn:hover:not(:disabled){filter:brightness(1.12)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .shop{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;padding-bottom:64px;align-items:start}
-.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-block:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.chip{min-height:40px;padding:0 14px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:600}
-.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-block:14px}
+.chip{min-height:40px;padding:0 14px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font-weight:600;border-radius:20px}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .tools input{flex:1 1 200px}
-.ai{background:var(--panel);padding:18px;margin-block:16px;display:grid;gap:10px}
+.ai{background:var(--folder2);padding:20px;margin-block:16px;display:grid;gap:10px;border-radius:0 10px 10px 10px}
 .ai .row,.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .airesult{display:grid;gap:8px}
 .airow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-top:1px solid var(--line);padding-top:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:16px}
-.card{background:var(--bg);padding:16px;display:flex;flex-direction:column;gap:8px}
-.card svg{width:40px;height:40px;stroke:var(--ink)}
-.card .price{font-size:22px;font-weight:800;font-stretch:110%;white-space:nowrap;margin-top:auto}
-.card .tag{font-size:13px;color:var(--ok)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:8px}
+.card{background:var(--sheet);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:8px;position:relative}
+.card svg{width:38px;height:38px;stroke:var(--grey)}
+.card .price{font:800 23px/1.1 "Bricolage Grotesque",sans-serif;font-stretch:88%;margin-top:auto;padding-top:6px}.card .price span{display:block;font:400 13px/1.4 "Public Sans",sans-serif}.card .tag.badt{color:var(--red);font-weight:600}
+.card .tag{font-size:13px;color:var(--grey)}
+.card .stamp{position:absolute;top:16px;right:14px}
 .qty{display:flex;align-items:center;gap:6px}
-.qty button{width:44px;height:44px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:18px}
+.qty button{width:44px;height:44px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font-size:18px;border-radius:6px}
 .qty output{min-width:28px;text-align:center;font-weight:700}
-.file{position:sticky;top:96px;border-top:4px solid var(--ink);padding-top:12px;display:grid;gap:12px}
-.file ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+/* sticky list = a sheet clipped in the folder */
+.file{position:sticky;top:110px;background:var(--sheet);border:1px solid var(--line);border-top:10px solid var(--folder);padding:18px;display:grid;gap:12px}
+.file ul,.file ol{margin:0;padding:0;display:grid;gap:8px}
+.file ul{list-style:none}
 .file li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.file ol li{display:list-item;margin-left:20px}
 .num{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
 .sum{display:flex;justify-content:space-between;gap:12px;font-weight:700}
-.page{padding-block:clamp(28px,4vw,48px) 64px;display:grid;gap:28px}
+.page{padding-block:clamp(24px,4vw,44px) 64px;display:grid;gap:28px}
 .cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px;align-items:start}
 .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:15px}
 th{text-align:left;font-size:13px;color:var(--grey);font-weight:600;border-bottom:2px solid var(--ink);padding:8px 10px}
-td{border-bottom:1px solid var(--line);padding:10px;vertical-align:middle}
+td{border-bottom:1px solid var(--line);padding:11px 10px;vertical-align:middle}
 td.num,th.num{text-align:right}
-tr.win td{font-weight:700}
-tr.win td:first-child{box-shadow:inset 4px 0 0 var(--red)}
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:4px solid var(--ink)}
-.steps li{padding:12px 12px 12px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}
-.steps .n{font-size:clamp(28px,3.4vw,40px);font-weight:800;font-stretch:115%;line-height:1;color:var(--line)}
-.steps .done .n{color:var(--ink)}
-.steps .now .n{color:var(--red)}
-.steps .t{font-weight:700}
-.blk{display:grid;gap:16px;border-top:1px solid var(--line);padding-top:24px}
-.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
-.plan{background:var(--bg);padding:20px;display:flex;flex-direction:column;gap:10px}
-.plan.pick{box-shadow:inset 0 4px 0 var(--red)}
-.plan .pr{font-size:32px;font-weight:800;font-stretch:112%;white-space:nowrap}
+tr.win td{font-weight:700;background:color-mix(in srgb,var(--stamp) 6%,transparent)}
+/* stepper = divider tabs on a folder edge */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.steps li{padding:12px 14px;background:var(--folder2);border-radius:10px 10px 0 0;border-bottom:4px solid var(--line);display:grid;gap:2px}
+.steps .n{font:800 clamp(26px,3vw,36px)/1 "Bricolage Grotesque",sans-serif;font-stretch:80%;color:var(--grey);opacity:.55}
+.steps .done{background:var(--folder)}
+.steps .done .n{color:var(--ink);opacity:1}
+.steps .now{background:var(--sheet);border-bottom-color:var(--stamp)}
+.steps .now .n{color:var(--stamp);opacity:1}
+.steps .t{font-weight:700;font-size:15px}
+.blk{display:grid;gap:16px;background:var(--sheet);border:1px solid var(--line);padding:clamp(18px,3vw,28px)}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.plan{background:var(--sheet);border:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:10px}
+.plan.pick{border:2px solid var(--stamp)}
+.plan .pr{font:800 34px/1 "Bricolage Grotesque",sans-serif;font-stretch:85%;white-space:nowrap}
 .plan ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px}
 .plan .btn{margin-top:auto}
-.catcard{border:1px solid var(--line);padding:clamp(16px,3vw,24px);display:grid;gap:14px}
+.catcard{border:1px solid var(--line);padding:clamp(16px,3vw,24px);display:grid;gap:14px;background:var(--paper)}
 .rfqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.rfq{background:var(--panel);padding:14px;display:grid;gap:6px;align-content:start}
+.rfq{background:var(--sheet);border:1px solid var(--line);padding:14px;display:grid;gap:6px;align-content:start}
 details{border-top:1px solid var(--line);padding-top:8px}
 summary{cursor:pointer;font-weight:600;min-height:32px}
-.docprev{border:1px solid var(--line);padding:16px;margin-top:8px;display:grid;gap:10px;font-size:14px;background:var(--bg)}
-.docprev .hd{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:8px}
-.kind{color:var(--red);font-weight:700}
+.docprev{border:1px solid var(--line);padding:22px;margin-top:8px;display:grid;gap:10px;font-size:14px;background:var(--sheet);box-shadow:4px 4px 0 var(--folder2)}
+.docprev .hd{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.kind{color:var(--stamp);font-weight:700}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .status{font-weight:700;white-space:nowrap}
-.s-castigata,.s-trimisa{color:var(--grey)}.s-comandata{color:var(--red)}.s-livrata{color:var(--ok)}.s-necastigata{color:var(--grey);font-weight:400}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:4px solid var(--ink)}
-.stat{padding:14px 16px 14px 0;border-bottom:1px solid var(--line)}
-.stat .v{font-size:clamp(26px,3.2vw,38px);font-weight:800;font-stretch:112%;white-space:nowrap}
+.s-castigata,.s-trimisa{color:var(--grey)}.s-comandata{color:var(--stamp)}.s-livrata{color:var(--ink)}.s-necastigata{color:var(--grey);font-weight:400}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat{padding:16px;background:var(--sheet);border:1px solid var(--line);border-top:6px solid var(--folder)}
+.stat .v{font:800 clamp(26px,3.2vw,38px)/1.1 "Bricolage Grotesque",sans-serif;font-stretch:85%;white-space:nowrap}
 .seg{display:flex;flex-wrap:wrap;gap:8px}
 .funnel{display:grid;gap:10px}
 .fr{display:grid;grid-template-columns:160px minmax(0,1fr) 100px;gap:12px;align-items:center}
-.fr .bar{height:28px;background:var(--panel)}
+.fr .bar{height:26px;background:var(--folder2);border-radius:4px;overflow:hidden}
 .fr .bar i{display:block;height:100%;background:var(--ink)}
-.fr.hot .bar i{background:var(--red)}
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;max-width:min(560px,92vw);font-size:15px;z-index:10;display:flex;gap:12px;align-items:center}
+.fr.hot .bar i{background:var(--stamp)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:12px 18px;max-width:min(560px,92vw);font-size:15px;z-index:10;display:flex;gap:12px;align-items:center;border-radius:8px}
 .toast[hidden]{display:none}
-.toast button{background:transparent;border:1px solid var(--bg);color:var(--bg);min-height:36px;padding:0 12px;cursor:pointer}
-.empty{border:1px dashed var(--line);padding:24px;color:var(--grey)}
+.toast button{background:transparent;border:1px solid var(--paper);color:var(--paper);min-height:36px;padding:0 12px;cursor:pointer;border-radius:4px}
+.empty{border:1px dashed var(--line);padding:24px;color:var(--grey);background:var(--sheet)}
 .mbar{display:none}
 .specs{display:flex;flex-wrap:wrap;gap:4px}
-.sp{font-size:12px;border:1px solid var(--line);padding:2px 6px;white-space:nowrap}
-.sp.bad{border-color:var(--red);color:var(--red)}
-.okt{color:var(--ok);font-weight:600}.badt{color:var(--red);font-weight:600}
-.card .tag.bad{color:var(--red)}
-.drop{border:2px dashed var(--line);padding:18px;display:grid;gap:10px}
-.drop.on{border-color:var(--red)}
-.rule{border-left:4px solid var(--red);padding:4px 0 4px 14px;max-width:72ch}
+.sp{font-size:12px;background:var(--paper);border:1px solid var(--line);padding:2px 7px;border-radius:4px;white-space:nowrap}
+.okt{color:var(--stamp);font-weight:600}.badt{color:var(--red);font-weight:600}
+.drop{border:2px dashed var(--folder);background:var(--sheet);padding:22px;display:grid;gap:12px}
+.rule{border-left:4px solid var(--stamp);background:var(--sheet);padding:12px 16px;max-width:76ch}
+/* the stamp */
+.stamp{display:inline-block;font:800 12px/1 "Bricolage Grotesque",sans-serif;font-stretch:90%;letter-spacing:.08em;text-transform:uppercase;color:var(--stamp);border:2px solid currentColor;border-radius:4px;padding:5px 8px 4px;transform:rotate(-4deg);opacity:.9;white-space:nowrap;box-shadow:inset 0 0 0 1px color-mix(in srgb,currentColor 35%,transparent)}
+.stamp.no{color:var(--red);transform:rotate(3deg)}
+.stamp.win{font-size:13px}
+@media(prefers-reduced-motion:no-preference){.meter i{transition:width .5s ease}.stamp.fresh{animation:thump .35s ease-out both}@keyframes thump{0%{transform:scale(1.6) rotate(-10deg);opacity:0}70%{transform:scale(.96) rotate(-4deg);opacity:1}100%{transform:scale(1) rotate(-4deg);opacity:.9}}}
 @media(max-width:900px){.shop{grid-template-columns:minmax(0,1fr)}.file{position:static}.cols{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:720px){.lead{grid-template-columns:minmax(0,1fr)}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.mbar{display:flex;position:sticky;top:0;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--ink);color:var(--bg);font-weight:700;z-index:4}.top{position:static}.fr{grid-template-columns:110px minmax(0,1fr) 80px}}
+@media(max-width:720px){.lead{grid-template-columns:minmax(0,1fr)}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.mbar{display:flex;position:sticky;top:0;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--ink);color:var(--paper);font-weight:700;z-index:4}.top{position:static}nav{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none}nav a{padding:0 12px;font-size:14px;white-space:nowrap;flex:none}.brand{padding-bottom:4px}.fr{grid-template-columns:110px minmax(0,1fr) 80px}}
 @media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0}.stack td::before{content:attr(data-l);color:var(--grey)}}
-@media(prefers-reduced-motion:no-preference){.meter i{transition:width .5s ease}}
 </style>
 </head>
 <body>
@@ -365,7 +379,7 @@ $('mU').style.width=u+'%';$('mC').style.width=Math.max(0,Math.min(100-u,co/maxP*
 $('legend').innerHTML=`<span>Ales: <b>${fmt(used)}</b></span><span>Proiect maxim: <b>${fmt(maxP)}</b></span><span>Cofinanțarea ta: <b>${fmt(co)}</b></span>`+(left<0?`<span style="color:var(--red)"><b>Ai depășit bugetul cu ${fmt(-left)}</b></span>`:'');
 }
 
-function tagFor(p){if(!st.base)return '<p class="tag">Verificat față de procedură (demo)</p>';const b=baseFor(p);if(!b)return '<p class="small muted">Nu e în lista ta aprobată</p>';const f=fails(p,b);return f.length?`<p class="tag bad">Sub specificațiile aprobate: ${f.map(k=>SPEC[k][0]).join(', ')}</p>`:'<p class="tag">Conform cu oferta de la depunere</p>'}
+function tagFor(p){if(!st.base)return '<p class="tag">Verificat față de procedură (demo)</p>';const b=baseFor(p);if(!b)return '<p class="small muted">Nu e în lista ta aprobată</p>';const f=fails(p,b);return f.length?`<span class="stamp no">Sub minim</span><p class="tag badt">Sub oferta de la depunere: ${f.map(k=>SPEC[k][0].toLowerCase()).join(', ')}</p>`:'<span class="stamp">Conform</span><p class="tag">Îndeplinește oferta de la depunere</p>'}
 function renderCatalog(){
 $('cats').innerHTML=['Toate','IT','HoReCa','Mobilier','Beauty'].map(c=>`<button class="chip" type="button" data-cat="${c}" aria-pressed="${st.cat===c}">${c}</button>`).join('');
 const q=st.q.trim().toLowerCase();
@@ -396,7 +410,7 @@ const o=$('baseOut');if(!st.base){o.innerHTML='';return}
 const rows=st.base.map((b,i)=>{const r=bestFor(b),p=r.ok[0];return `<tr><td data-l="Achiziție"><b>${esc(b.name)}</b><br><span class="small muted">${esc(b.cat||'')}</span></td><td data-l="Minim"><div class="specs">${minList(b).map(t=>`<span class="sp">${esc(t)}</span>`).join('')||'<span class="small muted">fără specificații extrase</span>'}</div></td><td class="num" data-l="Cant.">${b.qty}</td><td class="num" data-l="Aprobat">${fmt(b.val)}</td><td data-l="În catalog">${p?`<span class="okt">${r.ok.length} conform${r.ok.length>1?'e':''}</span>, de la ${fmt(p.price)}${r.bad.length?`<br><span class="small badt">${r.bad.length} sub minim, marcat${r.bad.length>1?'e':''} în catalog</span>`:''}`:'<span class="badt">Niciun produs conform</span><br><span class="small muted">cererea pleacă la furnizorii din categorie sau la furnizorul tău</span>'}</td></tr>`}).join('');
 const tot=st.base.reduce((a,b)=>a+b.val,0),inCat=st.base.filter(b=>bestFor(b).ok.length).length;
 o.innerHTML=`<div class="blk"><div class="row" style="justify-content:space-between"><h2>Lista de achiziții aprobată</h2><span class="small muted">${st.base.length} poziții, ${fmt(tot)} fără TVA${st.baseSrc?', din '+esc(st.baseSrc):''}</span></div><div class="scroll"><table class="stack"><thead><tr><th>Achiziție aprobată</th><th>Specificații minime</th><th class="num">Cant.</th><th class="num">Valoare aprobată</th><th>În catalog</th></tr></thead><tbody>${rows}</tbody></table></div><div class="actions"><button class="btn red" type="button" id="takeAll">Preia în dosar: ${inCat} din ${st.base.length} poziții</button><a class="btn ghost" href="#catalog">Vezi catalogul filtrat</a><span class="small muted">Se alege cel mai ieftin produs conform. Îl poți schimba din catalog.</span></div></div>`}
-function confCell(p){if(!st.base)return '<span class="small muted"><a href="#proiect">Încarcă proiectul</a> ca să verificăm</span>';const b=baseFor(p);if(!b)return '<span class="badt">Nu e în lista aprobată</span>';const f=fails(p,b);if(f.length)return `<span class="badt">Sub minim: ${f.map(k=>SPEC[k][0]).join(', ')}</span>`;const over=p.price*1-b.val/(b.qty||1);return `<span class="okt">Conform</span>${over>0?`<br><span class="small muted">peste valoarea aprobată cu ${fmt(over)}/buc., diferența e cofinanțare</span>`:''}`}
+function confCell(p){if(!st.base)return '<span class="small muted"><a href="#proiect">Încarcă proiectul</a> ca să verificăm</span>';const b=baseFor(p);if(!b)return '<span class="badt">Nu e în lista aprobată</span>';const f=fails(p,b);if(f.length)return `<span class="stamp no">Sub minim</span><br><span class="small badt">${f.map(k=>SPEC[k][0]).join(', ')}</span>`;const over=p.price*1-b.val/(b.qty||1);return `<span class="stamp">Conform</span>${over>0?`<br><span class="small muted">peste valoarea aprobată cu ${fmt(over)}/buc., diferența e cofinanțare</span>`:''}`}
 function renderDosar(){
 renderSteps();
 const lines=cartLines(),gs=catGroups();
@@ -412,7 +426,7 @@ h+=`<div class="blk"><div class="row" style="justify-content:space-between"><h2>
 if(!st.rfq)h+=`<p class="muted">Platforma pregătește câte 3 cereri de ofertă pentru fiecare categorie, către furnizori diferiți.</p><div class="row"><button class="btn red" type="button" id="genRfq">Generează ${gs.length*3} cereri de ofertă</button></div>`;
 else h+=gs.map(g=>`<div class="catcard"><h3>${g.cat}: 3 cereri trimise</h3><div class="rfqs">${CATSUP[g.cat].map((k,i)=>`<div class="rfq"><b>${SUP[k].name}</b><span class="small muted">${SUP[k].city} · CO-${g.cat}-${i+1}</span><span class="small">${st.recv?'Ofertă primită':'Așteaptă răspuns până la '+due}</span><details><summary>Vezi cererea</summary><div class="docprev">${docRFQ(g,k,i)}</div></details></div>`).join('')}</div></div>`).join('')+(st.recv?'':`<div class="row"><button class="btn" type="button" id="recv">Simulează răspunsurile furnizorilor</button><span class="small muted">În platformă, furnizorii răspund din panoul lor.</span></div>`);
 h+='</div>';
-if(st.recv){h+=`<div class="blk"><h2>Ofertele primite și comparația</h2>`+gs.map((g,gi)=>{const os=offersFor(g);const w=os.find(o=>o.win);const mx=Math.max(...os.filter(o=>o.ok).map(o=>o.net));return `<div class="catcard"><div class="row" style="justify-content:space-between"><h3>${g.cat}: ${w?'câștigă '+SUP[w.sup].name:'nicio ofertă conformă'}</h3>${w?`<span class="small muted">economie față de cea mai scumpă ofertă conformă: <b>${fmt(mx-w.net)}</b></span>`:''}</div><div class="scroll"><table class="stack"><thead><tr><th>Ofertant</th><th class="num">Total fără TVA</th><th class="num">Livrare</th><th class="num">Garanție</th><th>Specificații</th><th>Rezultat</th></tr></thead><tbody>${os.map(o=>`<tr class="${o.win?'win':''}"><td data-l="Ofertant">${SUP[o.sup].name}</td><td class="num" data-l="Total">${fmt(o.net)}</td><td class="num" data-l="Livrare">${SUP[o.sup].del} zile</td><td class="num" data-l="Garanție">${SUP[o.sup].war} luni</td><td data-l="Specificații">${o.ok?'<span class="okt">Conformă</span>':`<span class="badt">Sub minim</span><br><span class="small muted">${esc(badTxt(o))}</span>`}</td><td data-l="Rezultat">${o.win?'Câștigătoare, cel mai mic preț conform':o.ok?'Necâștigătoare':'Respinsă'}</td></tr>`).join('')}</tbody></table></div>${os.map((o,i)=>`<details><summary>Oferta ${SUP[o.sup].name}</summary><div class="docprev">${docOffer(g,o,i)}</div></details>`).join('')}<details><summary>Procesul-verbal de selecție</summary><div class="docprev">${docNote(g,os)}</div></details><div class="actions"><button class="btn ghost" type="button" data-dl="${gi}">Descarcă dosarul ${g.cat}: 3 cereri, 3 oferte, proces-verbal</button></div></div>`}).join('')+`<div class="actions"><button class="btn red" type="button" id="send" ${st.sent?'disabled':''}>${st.sent?'Comenzile au fost trimise':'Trimite comanda către câștigători'}</button><span class="small muted">${st.sent?'Furnizorii câștigători o văd în Panou furnizor.':'Fiecare furnizor câștigător confirmă comanda din panoul lui.'}</span></div></div>`}
+if(st.recv){h+=`<div class="blk"><h2>Ofertele primite și comparația</h2>`+gs.map((g,gi)=>{const os=offersFor(g);const w=os.find(o=>o.win);const mx=Math.max(...os.filter(o=>o.ok).map(o=>o.net));return `<div class="catcard"><div class="row" style="justify-content:space-between"><h3>${g.cat}: ${w?'câștigă '+SUP[w.sup].name:'nicio ofertă conformă'}</h3>${w?`<span class="small muted">economie față de cea mai scumpă ofertă conformă: <b>${fmt(mx-w.net)}</b></span>`:''}</div><div class="scroll"><table class="stack"><thead><tr><th>Ofertant</th><th class="num">Total fără TVA</th><th class="num">Livrare</th><th class="num">Garanție</th><th>Specificații</th><th>Rezultat</th></tr></thead><tbody>${os.map(o=>`<tr class="${o.win?'win':''}"><td data-l="Ofertant">${SUP[o.sup].name}</td><td class="num" data-l="Total">${fmt(o.net)}</td><td class="num" data-l="Livrare">${SUP[o.sup].del} zile</td><td class="num" data-l="Garanție">${SUP[o.sup].war} luni</td><td data-l="Specificații">${o.ok?'<span class="stamp">Conformă</span>':`<span class="stamp no">Respinsă</span><br><span class="small muted">${esc(badTxt(o))}</span>`}</td><td data-l="Rezultat">${o.win?'<span class="stamp win fresh">Câștigătoare</span><br><span class="small muted">cel mai mic preț conform</span>':o.ok?'Necâștigătoare':'Sub specificații'}</td></tr>`).join('')}</tbody></table></div>${os.map((o,i)=>`<details><summary>Oferta ${SUP[o.sup].name}</summary><div class="docprev">${docOffer(g,o,i)}</div></details>`).join('')}<details><summary>Procesul-verbal de selecție</summary><div class="docprev">${docNote(g,os)}</div></details><div class="actions"><button class="btn ghost" type="button" data-dl="${gi}">Descarcă dosarul ${g.cat}: 3 cereri, 3 oferte, proces-verbal</button></div></div>`}).join('')+`<div class="actions"><button class="btn red" type="button" id="send" ${st.sent?'disabled':''}>${st.sent?'Comenzile au fost trimise':'Trimite comanda către câștigători'}</button><span class="small muted">${st.sent?'Furnizorii câștigători o văd în Panou furnizor.':'Fiecare furnizor câștigător confirmă comanda din panoul lui.'}</span></div></div>`}
 }
 $('dosarBody').innerHTML=h;
 }
