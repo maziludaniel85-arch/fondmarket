@@ -10,3 +10,9 @@ Prototip demonstrativ pentru o platformă de achiziții destinată beneficiarilo
 Furnizorii, produsele, prețurile și tarifele sunt fictive.
 
 Pagina e un singur fișier `index.html`, fără build. Pe GitHub Pages, datele rămân în browserul vizitatorului, iar asistentul AI nu e activ (butonul „Folosește exemplul” arată fluxul complet).
+
+## Prototip B2B (React + Tailwind)
+
+În folderul `b2b/`: marketplace B2B pentru beneficiari de finanțare și furnizori — landing, dashboard beneficiar (inclusiv achiziții Start-Up Nation pornind de la oferta de la depunere) și dashboard furnizor.
+
+Link: https://maziludaniel85-arch.github.io/fondmarket/b2b/
