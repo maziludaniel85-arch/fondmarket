@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>FondMarket B2B</title>
 <!-- VOICE modern B2B SaaS (Stripe/Linear): calm, precise, trustworthy
      IDEA a procurement desk for publicly funded projects: requests, offers, status
@@ -16,6 +17,9 @@
 tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']},colors:{ground:'#F8FAFC',line:'#E2E8F0',navy:{50:'#EEF2FB',100:'#DCE4F7',600:'#2A4BA8',700:'#1E3A8A',800:'#172E6E',900:'#0F1F4D'},emerald:{50:'#ECFDF5',100:'#D1FAE5',500:'#10B981',600:'#059669',700:'#047857'}},boxShadow:{card:'0 1px 2px rgba(15,23,42,.04), 0 1px 1px rgba(15,23,42,.02)',lift:'0 12px 32px -12px rgba(15,31,77,.18)'}}}}
 </script>
 <style>
+html,:root,:root[data-theme=dark]{color-scheme:light}
+input,select,textarea{color:#0f172a;background-color:#fff}
+input::placeholder,textarea::placeholder{color:#94a3b8}
 body{font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased}
 .num{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){.fade-in{animation:fi .35s ease-out both}@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
@@ -352,7 +356,7 @@ const m=Math.min(...offs.filter(o=>!o.bad).map(o=>o.price));return offs.map(o=>(
 const DAYS_LEFT=Math.max(0,Math.round((new Date('2027-12-08')-new Date('2026-11-21'))/864e5));
 
 function SpecAdder({onAdd}){const [v,setV]=useState('');const go=()=>{const t=v.trim();if(!t)return;const sp=parseSpec(t);if(sp)onAdd(sp);setV('')};
-return <div className="flex gap-1"><input value={v} onChange={e=>setV(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();go()}}} placeholder="ex. Volum minim 700 L" aria-label="Specificație nouă" className="min-h-[32px] w-full min-w-0 rounded-md border border-line px-2 text-sm focus:border-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-100"/><button type="button" onClick={go} aria-label="Adaugă specificația" className="grid h-8 w-8 shrink-0 place-items-center rounded-md ring-1 ring-line hover:bg-slate-50"><Plus className="h-4 w-4"/></button></div>}
+return <div className="flex gap-1"><input value={v} onChange={e=>setV(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();go()}}} placeholder="ex. Volum minim 700 L" aria-label="Specificație nouă" className="min-h-[32px] w-full min-w-0 rounded-md border border-line bg-white px-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-100"/><button type="button" onClick={go} aria-label="Adaugă specificația" className="grid h-8 w-8 shrink-0 place-items-center rounded-md ring-1 ring-line hover:bg-slate-50"><Plus className="h-4 w-4"/></button></div>}
 function ReviewList({items,setItems,raw,onConfirm,rate,setRate}){const hasEur=items.some(x=>x.cur==='EUR');
 const upd=(i,patch)=>setItems(a=>a.map((x,j)=>j===i?{...x,...patch,warn:false}:x));
 const del=i=>setItems(a=>a.filter((_,j)=>j!==i));
