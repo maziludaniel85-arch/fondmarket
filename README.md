@@ -13,6 +13,6 @@ Pagina e un singur fișier `index.html`, fără build. Pe GitHub Pages, datele r
 
 ## Prototip B2B (React + Tailwind)
 
-În folderul `b2b/`: marketplace B2B pentru beneficiari de finanțare și furnizori — landing, dashboard beneficiar (inclusiv achiziții Start-Up Nation pornind de la oferta de la depunere) și dashboard furnizor.
+În folderul `b2b/`: platformă dedicată programului Start-Up Nation: oferte pentru înscriere, achiziții pornind de la oferta de la depunere și dashboard pentru furnizori.
 
 Link: https://maziludaniel85-arch.github.io/fondmarket/b2b/

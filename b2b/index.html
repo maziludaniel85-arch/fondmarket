@@ -38,37 +38,35 @@ const {useState,useMemo,useEffect,useRef}=React;
 const I=window.LucideReact;
 const {ShieldCheck,BadgeCheck,Building2,Landmark,FileText,Send,Star,Search,Filter,Briefcase,ArrowRight,Sparkles,Clock,Trophy,Inbox,LayoutDashboard,Plus,ChevronRight,CheckCircle2,MapPin,Users,Store,Bell,Eye,TrendingUp,Hourglass,Tag,Wallet,FolderKanban,X,Upload,Lock,FileCheck,Download,AlertTriangle,CalendarClock,Package,ListChecks,Scale,Paperclip,CircleDashed,Mail,Rocket,ShoppingCart,Calculator,Coffee,Scissors,Laptop,Car,Sofa,Printer,Globe,Wrench,Minus,Gift}=I;
 
-const PROGRAMS=['PNRR','Fonduri Europene','Start-Up Nation','Programe regionale'];
-const PCOLOR={'PNRR':'bg-navy-50 text-navy-700 ring-navy-100','Fonduri Europene':'bg-sky-50 text-sky-700 ring-sky-100','Start-Up Nation':'bg-violet-50 text-violet-700 ring-violet-100','Programe regionale':'bg-amber-50 text-amber-700 ring-amber-100'};
-const DOMAINS=['Echipamente HoReCa','Echipamente IT','Software','Servicii IT','Mobilier','Energie verde','Consultanță','Echipamente medicale'];
+const PROGRAMS=['Implementare','Înscriere'];
+const PCOLOR={'Implementare':'bg-navy-50 text-navy-700 ring-navy-100','Înscriere':'bg-amber-50 text-amber-700 ring-amber-100','Start-Up Nation':'bg-violet-50 text-violet-700 ring-violet-100'};
+const DOMAINS=['HoReCa','IT și software','Mobilier','Beauty','Utilaje','Energie verde','Consultanță'];
 const CPV=[['30213100-6','Calculatoare portabile','Echipamente IT'],['48000000-8','Pachete software','Software'],['72000000-5','Servicii IT','Servicii IT'],['39130000-2','Mobilier de birou','Mobilier'],['09331200-0','Panouri fotovoltaice','Energie verde'],['79411000-8','Consultanță în management','Consultanță'],['33100000-1','Echipamente medicale','Echipamente medicale']];
 const lei=n=>new Intl.NumberFormat('ro-RO').format(Math.round(n))+' lei';
 
 const PROJECTS=[
-{id:'P1',name:'Digitalizare cabinet stomatologic',program:'PNRR',budget:450000,used:0.62,status:'În implementare',deadline:'30.06.2027'},
-{id:'P2',name:'Cafenea de specialitate, Brașov',program:'Start-Up Nation',budget:277778,used:0.18,status:'Achiziții deschise',deadline:'08.12.2027'},
-{id:'P3',name:'Sistem fotovoltaic hală producție',program:'Fonduri Europene',budget:1250000,used:0.05,status:'Contractare',deadline:'15.03.2028'}];
+{id:'P2',name:'Cafenea de specialitate, Brașov',program:'Start-Up Nation',budget:277778,used:0.18,status:'Achiziții deschise',deadline:'08.12.2027'}];
 
 const OFFERS0=[
-{id:'O1',rfq:'Laptopuri pentru echipa clinică (6 buc.)',supplier:'TechDepo Distribuție',city:'București',price:31800,days:5,warranty:36,rating:4.9,reviews:128,verified:true,conform:true,years:12,status:'nouă'},
-{id:'O2',rfq:'Laptopuri pentru echipa clinică (6 buc.)',supplier:'NetPro Systems',city:'Iași',price:29950,days:8,warranty:24,rating:4.6,reviews:54,verified:true,conform:true,years:7,status:'nouă'},
-{id:'O3',rfq:'Laptopuri pentru echipa clinică (6 buc.)',supplier:'Office Point',city:'Cluj-Napoca',price:27400,days:12,warranty:24,rating:4.1,reviews:19,verified:false,conform:false,years:2,status:'nouă',note:'8 GB RAM, sub minimul cerut de 16 GB'},
-{id:'O4',rfq:'Software gestiune programări',supplier:'Clinica Soft',city:'Timișoara',price:18500,days:21,warranty:12,rating:4.8,reviews:76,verified:true,conform:true,years:9,status:'nouă'}];
+{id:'O1',rfq:'Espressor profesional, 2 grupuri',supplier:'Horeca Pro Echipamente',city:'Cluj-Napoca',price:18020,days:7,warranty:24,rating:4.9,reviews:128,verified:true,conform:true,years:12,status:'nouă'},
+{id:'O2',rfq:'Espressor profesional, 2 grupuri',supplier:'Bucătăria Pro',city:'Iași',price:16980,days:5,warranty:36,rating:4.7,reviews:54,verified:true,conform:true,years:7,status:'nouă'},
+{id:'O3',rfq:'Espressor profesional, 2 grupuri',supplier:'Gastro Line Distribuție',city:'București',price:15050,days:10,warranty:12,rating:4.1,reviews:19,verified:false,conform:false,years:2,status:'nouă',note:'1 grup, sub minimul de 2 grupuri din oferta de la depunere'},
+{id:'O4',rfq:'Sistem POS cu imprimantă fiscală',supplier:'TechDepo Distribuție',city:'București',price:3390,days:3,warranty:24,rating:4.8,reviews:76,verified:true,conform:true,years:9,status:'nouă'}];
 
-const MYRFQ0=[{id:'R1',title:'Laptopuri pentru echipa clinică (6 buc.)',project:'P1',cpv:'30213100-6',budget:33000,offers:3,deadline:'28.11.2026'},{id:'R2',title:'Software gestiune programări',project:'P1',cpv:'48000000-8',budget:20000,offers:1,deadline:'05.12.2026'}];
+const MYRFQ0=[{id:'R1',title:'Espressor profesional, 2 grupuri',project:'P2',cpv:'39221000-7',budget:17500,offers:3,deadline:'28.11.2026'},{id:'R2',title:'Sistem POS cu imprimantă fiscală',project:'P2',cpv:'30200000-1',budget:3500,offers:1,deadline:'05.12.2026'}];
 
 const FEED=[
-{id:'F1',title:'Laptopuri pentru echipa clinică (6 buc.)',buyer:'Dental Line SRL',kind:'IMM',city:'Constanța',program:'PNRR',domain:'Echipamente IT',cpv:'30213100-6',budget:33000,deadline:'28.11.2026',offers:3},
-{id:'F2',title:'Platformă e-guvernare pentru taxe locale',buyer:'Primăria Comunei Snagov',kind:'Primărie',city:'Ilfov',program:'PNRR',domain:'Software',cpv:'48000000-8',budget:640000,deadline:'12.12.2026',offers:2},
-{id:'F3',title:'Mobilier birouri, 14 posturi',buyer:'Atelier Verde SRL',kind:'IMM',city:'Sibiu',program:'Programe regionale',domain:'Mobilier',cpv:'39130000-2',budget:56000,deadline:'03.12.2026',offers:5},
-{id:'F4',title:'Sistem fotovoltaic 50 kWp',buyer:'Metal Form SA',kind:'IMM',city:'Arad',program:'Fonduri Europene',domain:'Energie verde',cpv:'09331200-0',budget:310000,deadline:'20.12.2026',offers:1},
-{id:'F5',title:'Consultanță implementare proiect',buyer:'Cafeneaua Colț SRL',kind:'Startup',city:'Brașov',program:'Start-Up Nation',domain:'Consultanță',cpv:'79411000-8',budget:10000,deadline:'01.12.2026',offers:4},
-{id:'F6',title:'Ecograf portabil pentru dispensar',buyer:'Primăria Orașului Otopeni',kind:'Primărie',city:'Ilfov',program:'PNRR',domain:'Echipamente medicale',cpv:'33100000-1',budget:185000,deadline:'15.12.2026',offers:0},
-{id:'F8',title:'Ofertă pentru înscriere: espressor 2 grupuri',buyer:'Ioana M., aplicant Start-Up Nation',kind:'Aplicant',city:'Cluj-Napoca',program:'Start-Up Nation',domain:'Echipamente HoReCa',cpv:'39221000-7',budget:18000,deadline:'26.11.2026',offers:1},
-{id:'F9',title:'Ofertă pentru înscriere: laptop și imprimantă 3D',buyer:'Radu P., aplicant Start-Up Nation',kind:'Aplicant',city:'Iași',program:'Start-Up Nation',domain:'Echipamente IT',cpv:'30213100-6',budget:14100,deadline:'27.11.2026',offers:0},
-{id:'F7',title:'Servicii migrare cloud și securitate',buyer:'Logistic Fast SRL',kind:'IMM',city:'Ploiești',program:'Fonduri Europene',domain:'Servicii IT',cpv:'72000000-5',budget:240000,deadline:'18.12.2026',offers:2}];
+{id:'F1',title:'Espressor profesional, 2 grupuri',buyer:'Cafeneaua Colț SRL',kind:'Beneficiar',city:'Brașov',program:'Implementare',domain:'HoReCa',cpv:'39221000-7',budget:17500,deadline:'28.11.2026',offers:3},
+{id:'F2',title:'Cuptor rotativ panificație, 1 cărucior',buyer:'Brutăria Ana SRL',kind:'Beneficiar',city:'Focșani',program:'Implementare',domain:'HoReCa',cpv:'39221000-7',budget:63650,deadline:'02.12.2026',offers:2},
+{id:'F3',title:'Mașină de rindeluit la grosime 530 mm',buyer:'Atelier Lemn Urs SRL',kind:'Beneficiar',city:'Bacău',program:'Implementare',domain:'Utilaje',cpv:'42000000-6',budget:23400,deadline:'03.12.2026',offers:1},
+{id:'F4',title:'Sistem fotovoltaic 3 kW cu invertor',buyer:'Brutăria Ana SRL',kind:'Beneficiar',city:'Focșani',program:'Implementare',domain:'Energie verde',cpv:'09331200-0',budget:14300,deadline:'05.12.2026',offers:2},
+{id:'F5',title:'Pat de cosmetică electric și scaune coafor',buyer:'Studio Bella SRL',kind:'Beneficiar',city:'Timișoara',program:'Implementare',domain:'Beauty',cpv:'',budget:13800,deadline:'01.12.2026',offers:4},
+{id:'F6',title:'Laptop 15" și multifuncțională laser',buyer:'Code Garage SRL',kind:'Beneficiar',city:'Cluj-Napoca',program:'Implementare',domain:'IT și software',cpv:'30213100-6',budget:6400,deadline:'30.11.2026',offers:0},
+{id:'F8',title:'Ofertă pentru înscriere: espressor 2 grupuri',buyer:'Ioana M., aplicant Start-Up Nation',kind:'Aplicant',city:'Cluj-Napoca',program:'Înscriere',domain:'HoReCa',cpv:'39221000-7',budget:18000,deadline:'26.11.2026',offers:1},
+{id:'F9',title:'Ofertă pentru înscriere: laptop și imprimantă 3D',buyer:'Radu P., aplicant Start-Up Nation',kind:'Aplicant',city:'Iași',program:'Înscriere',domain:'IT și software',cpv:'30213100-6',budget:14100,deadline:'27.11.2026',offers:0},
+{id:'F7',title:'Ofertă pentru înscriere: mobilier salon, 3 posturi',buyer:'Maria D., aplicant Start-Up Nation',kind:'Aplicant',city:'Ploiești',program:'Înscriere',domain:'Mobilier',cpv:'39100000-3',budget:12500,deadline:'29.11.2026',offers:2}];
 
-const TRACK0=[{id:'T1',title:'Mobilier birouri, 14 posturi',buyer:'Atelier Verde SRL',price:52900,status:'evaluare'},{id:'T2',title:'Servicii migrare cloud și securitate',buyer:'Logistic Fast SRL',price:228000,status:'trimisa'},{id:'T3',title:'Echipamente IT școală gimnazială',buyer:'Primăria Comunei Corbeanca',price:96400,status:'castigata'}];
+const TRACK0=[{id:'T1',title:'Mobilier cafenea, 20 de locuri',buyer:'Cafeneaua Colț SRL',price:7900,status:'evaluare'},{id:'T2',title:'Laptop 15" și multifuncțională laser',buyer:'Code Garage SRL',price:6250,status:'trimisa'},{id:'T3',title:'Echipamente IT salon',buyer:'Studio Bella SRL',price:5480,status:'castigata'}];
 
 function Badge({children,tone='slate',icon:Ic}){const t={slate:'bg-slate-50 text-slate-700 ring-slate-200',navy:'bg-navy-50 text-navy-700 ring-navy-100',emerald:'bg-emerald-50 text-emerald-700 ring-emerald-100',amber:'bg-amber-50 text-amber-700 ring-amber-100',rose:'bg-rose-50 text-rose-700 ring-rose-100'}[tone]||tone;return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap ${t}`}>{Ic&&<Ic className="h-3.5 w-3.5" aria-hidden="true"/>}{children}</span>}
 const ProgramBadge=({p})=><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap ${PCOLOR[p]}`}>{p}</span>;
@@ -95,16 +93,16 @@ return <header className="sticky top-0 z-40 border-b border-line bg-white/85 bac
 /* ---------------- LANDING ---------------- */
 function Landing({setView}){
 const [role,setRole]=useState('beneficiar');const [prog,setProg]=useState('Toate');
-const list=FEED.filter(f=>prog==='Toate'||f.program===prog);
+const list=FEED.filter(f=>prog==='Toate'||f.domain===prog);
 const total=list.reduce((a,f)=>a+f.budget,0);
 const steps=role==='aplicant'?[[ShoppingCart,'Alegi echipamentele pe categorii','Catalog de produse de la furnizori verificați, cu prețuri orientative și eligibilitatea fiecărui produs în program.'],[Calculator,'Îți vezi bugetul pe loc','Totalul, grantul de până la 250.000 lei și cofinanțarea de minim 10% se calculează pe măsură ce adaugi produse.'],[FileText,'Primești ofertele pentru depunere','Furnizorii îți trimit oferte de preț în numele lor, gratuit. După aprobare, devin specificațiile minime pentru achiziție.']]:role==='beneficiar'?[[FileText,'Publici cererea de ofertă','Descrii nevoia, alegi codul CPV și bugetul estimat. Specificațiile minime din proiectul aprobat se preiau automat.'],[ShieldCheck,'Primești 3+ oferte verificate','Doar furnizori cu firmă verificată, fără conflict de interese, cu istoric și rating de la alți beneficiari.'],[CheckCircle2,'Alegi și exporți dosarul','Comparația, procesul-verbal de selecție și dovezile de transmitere ies gata pentru cererea de rambursare.']]
-:[[Search,'Găsești cereri finanțate','Feed filtrat pe domeniul tău și pe programul de finanțare, cu buget estimat și termen.'],[Send,'Trimiți oferta în 2 minute','Ofertă în numele firmei tale, cu specificații verificate automat față de cerință.'],[Trophy,'Urmărești și câștigi','Vezi starea fiecărei oferte, de la trimisă la câștigată, și primești plata din contul dedicat proiectului.']];
+:[[Search,'Găsești cereri Start-Up Nation','Feed filtrat pe categoria ta: aplicanți care au nevoie de oferte pentru înscriere și beneficiari care cumpără din proiectul aprobat.'],[Send,'Trimiți oferta în 2 minute','Ofertă în numele firmei tale, cu specificații verificate automat față de cerință.'],[Trophy,'Urmărești și câștigi','Vezi starea fiecărei oferte, de la trimisă la câștigată, și primești plata din contul dedicat proiectului.']];
 return <main className="fade-in">
 <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-14 pt-10 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-16">
 <div>
-<Badge tone="emerald" icon={ShieldCheck}>Gratuit pentru furnizori · conform cu regulile programelor</Badge>
-<h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl">Achiziții pentru proiecte finanțate, fără dosare întoarse.</h1>
-<p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">FondMarket conectează antreprenori, IMM-uri și primării cu furnizori verificați de echipamente, software și servicii. Cereri de ofertă, oferte comparabile și documente gata de decont.</p>
+<Badge tone="emerald" icon={ShieldCheck}>Gratuit pentru furnizori · conform cu procedura Start-Up Nation</Badge>
+<h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl">Achizițiile Start-Up Nation, fără dosare întoarse.</h1>
+<p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">FondMarket leagă beneficiarii Start-Up Nation de furnizori verificați de echipamente, software și servicii. Oferte pentru înscriere, cereri de ofertă cu specificațiile din proiectul aprobat și dosarul de achiziție gata pentru decont.</p>
 <fieldset className="mt-8"><legend className="text-sm font-medium text-slate-700">Sunt</legend>
 <div className="mt-2 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
 {[['aplicant','Mă înscriu în Start-Up Nation','Am nevoie de oferte pentru depunere',Rocket],['beneficiar','Am finanțarea aprobată','Cumpăr echipamentele din proiect',Building2],['furnizor','Sunt furnizor','Gratuit: primesc cereri de ofertă',Store]].map(([k,t,s,Ic])=>
@@ -120,8 +118,8 @@ return <main className="fade-in">
 
 <div className="relative">
 <Card className="overflow-hidden shadow-lift">
-<div className="flex items-center justify-between border-b border-line px-5 py-3"><div className="flex items-center gap-2 text-sm font-semibold"><FileText className="h-4 w-4 text-navy-700" aria-hidden="true"/>CO-2026-0418</div><ProgramBadge p="PNRR"/></div>
-<div className="px-5 py-4"><p className="font-semibold">Laptopuri pentru echipa clinică (6 buc.)</p><p className="mt-1 text-sm text-slate-500">CPV 30213100-6 · buget estimat {lei(33000)} · termen 28.11.2026</p></div>
+<div className="flex items-center justify-between border-b border-line px-5 py-3"><div className="flex items-center gap-2 text-sm font-semibold"><FileText className="h-4 w-4 text-navy-700" aria-hidden="true"/>CO-2026-0418</div><ProgramBadge p="Start-Up Nation"/></div>
+<div className="px-5 py-4"><p className="font-semibold">Espressor profesional, 2 grupuri</p><p className="mt-1 text-sm text-slate-500">Cafeneaua Colț SRL · valoare aprobată {lei(17500)} · termen 28.11.2026</p></div>
 <ul className="divide-y divide-line border-t border-line">
 {OFFERS0.slice(0,3).map((o,i)=><li key={o.id} className={`flex items-center gap-3 px-5 py-3 ${i===1?'bg-emerald-50/60':''}`}>
 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">{o.supplier.split(' ').map(w=>w[0]).slice(0,2).join('')}</span>
@@ -134,9 +132,9 @@ return <main className="fade-in">
 <section className="border-y border-line bg-white">
 <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-<div className="flex items-center gap-2 text-sm font-medium text-slate-700"><Filter className="h-4 w-4" aria-hidden="true"/>Cereri active după programul de finanțare</div>
-<div role="group" aria-label="Filtru program" className="flex gap-2 overflow-x-auto pb-1">
-{['Toate',...PROGRAMS].map(p=><button key={p} onClick={()=>setProg(p)} aria-pressed={prog===p} className={`min-h-[36px] flex-none rounded-full px-3.5 text-sm font-medium ring-1 ring-inset transition ${prog===p?'bg-navy-700 text-white ring-navy-700':'bg-white text-slate-600 ring-line hover:bg-slate-50'}`}>{p}</button>)}
+<div className="flex items-center gap-2 text-sm font-medium text-slate-700"><Filter className="h-4 w-4" aria-hidden="true"/>Cereri de ofertă active, pe categorii</div>
+<div role="group" aria-label="Filtru categorie" className="flex gap-2 overflow-x-auto pb-1">
+{['Toate',...DOMAINS.filter(d=>FEED.some(f=>f.domain===d))].map(p=><button key={p} onClick={()=>setProg(p)} aria-pressed={prog===p} className={`min-h-[36px] flex-none rounded-full px-3.5 text-sm font-medium ring-1 ring-inset transition ${prog===p?'bg-navy-700 text-white ring-navy-700':'bg-white text-slate-600 ring-line hover:bg-slate-50'}`}>{p}</button>)}
 </div></div>
 <div className="mt-6 grid gap-4 sm:grid-cols-3">
 {[['Cereri deschise',list.length,FolderKanban],['Valoare estimată',lei(total),Wallet],['Furnizori verificați',prog==='Toate'?412:Math.round(412*list.length/FEED.length),ShieldCheck]].map(([l,v,Ic])=>
@@ -144,7 +142,7 @@ return <main className="fade-in">
 </div>
 <ul className="mt-4 grid gap-3 md:grid-cols-2">
 {list.slice(0,4).map(f=><li key={f.id} className="flex items-center justify-between gap-3 rounded-lg border border-line px-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{f.title}</p><p className="text-xs text-slate-500">{f.buyer} · {f.city}</p></div><div className="flex flex-col items-end gap-1"><ProgramBadge p={f.program}/><span className="num text-xs font-semibold text-slate-700">{lei(f.budget)}</span></div></li>)}
-{!list.length&&<li className="rounded-lg border border-dashed border-line px-4 py-6 text-sm text-slate-500">Nicio cerere deschisă pentru acest program acum.</li>}
+{!list.length&&<li className="rounded-lg border border-dashed border-line px-4 py-6 text-sm text-slate-500">Nicio cerere deschisă în această categorie acum.</li>}
 </ul></div></section>
 
 <section id="cum" className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
@@ -490,16 +488,16 @@ const cpvInfo=CPV.find(c=>c[0]===f.cpv.trim());
 function submit(e){e.preventDefault();const er={};if(f.title.trim().length<5)er.title='Scrie un titlu de cel puțin 5 caractere.';if(!/^\d{8}-\d$/.test(f.cpv.trim()))er.cpv='Codul CPV are forma 30213100-6.';if(!(Number(f.budget)>0))er.budget='Introdu un buget estimat mai mare de 0.';setErr(er);if(Object.keys(er).length)return;
 setRfqs(r=>[{id:'R'+Date.now(),title:f.title.trim(),project:f.project,cpv:f.cpv.trim(),budget:Number(f.budget),offers:0,deadline:f.deadline.split('-').reverse().join('.'),fresh:true},...r]);setF(s=>({...s,title:'',cpv:'',budget:'',desc:''}));toast('Cererea de ofertă a fost publicată. Furnizorii verificați din domeniu au fost notificați.')}
 function accept(id){setOffers(o=>o.map(x=>x.id===id?{...x,status:'acceptată'}:x.rfq===o.find(y=>y.id===id).rfq?{...x,status:'respinsă'}:x));toast('Oferta a fost acceptată. Procesul-verbal de selecție e gata de semnat.')}
-const kpi=[['Proiecte active',PROJECTS.length,Briefcase],['Cereri deschise',rfqs.length,Inbox],['Oferte primite',offers.length,FileText],['Buget total',lei(PROJECTS.reduce((a,p)=>a+p.budget,0)),Wallet]];
+const kpi=[['Grant aprobat',lei(250000),Briefcase],['Cereri deschise',rfqs.length,Inbox],['Oferte primite',offers.length,FileText],['Termen cheltuieli','08.12.2027',CalendarClock]];
 const stTone={'În implementare':'navy','Achiziții deschise':'emerald','Contractare':'amber'};
 return <main className="fade-in mx-auto max-w-7xl px-4 py-8 sm:px-6">
-<div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm text-slate-500">Andreea Popescu · 3 proiecte în cont</p><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Bună ziua, Andreea</h1></div><Btn variant="navy" onClick={()=>{setTab('general');setTimeout(()=>document.getElementById('t-title')?.focus(),50)}}><Plus className="h-4 w-4" aria-hidden="true"/>Cerere nouă</Btn></div>
+<div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-sm text-slate-500">Cafeneaua Colț SRL · beneficiar Start-Up Nation</p><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Bună ziua, Andreea</h1></div><Btn variant="navy" onClick={()=>{setTab('general');setTimeout(()=>document.getElementById('t-title')?.focus(),50)}}><Plus className="h-4 w-4" aria-hidden="true"/>Cerere nouă</Btn></div>
 <div role="tablist" aria-label="Secțiuni beneficiar" className="mt-6 flex gap-6 overflow-x-auto border-b border-line">{[['general','Prezentare generală',LayoutDashboard],['sun','Achiziții Start-Up Nation',FileCheck]].map(([k,l,Ic])=><button key={k} role="tab" aria-selected={tab===k} onClick={()=>setTab(k)} className={`-mb-px flex min-h-[44px] flex-none items-center gap-2 border-b-2 text-sm font-medium transition ${tab===k?'border-navy-700 text-navy-700':'border-transparent text-slate-500 hover:text-slate-800'}`}><Ic className="h-4 w-4" aria-hidden="true"/>{l}{k==='sun'&&<span className="rounded-full bg-emerald-50 px-1.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">Nou</span>}</button>)}</div>
 {tab==='sun'?<div className="mt-6"><SunProject toast={toast} onRfq={it=>{setTab('general');setF(s=>({...s,title:it.name+(it.qty>1?` (${it.qty} buc.)`:''),project:'P2',cpv:it.cpv,budget:String(it.val),desc:it.specs.map(x=>specTxt(x)).join(', ')}));setTimeout(()=>document.getElementById('t-title')?.scrollIntoView({behavior:'smooth',block:'center'}),80)}}/></div>:<>
 <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">{kpi.map(([l,v,Ic])=><Card key={l} className="p-4"><div className="flex items-center justify-between text-sm text-slate-500">{l}<Ic className="h-4 w-4" aria-hidden="true"/></div><p className="num mt-2 text-xl font-bold tracking-tight sm:text-2xl">{v}</p></Card>)}</div>
 
 <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-<Card className="overflow-hidden"><div className="flex items-center justify-between border-b border-line px-5 py-4"><h2 className="font-semibold">Proiectele mele active</h2><span className="text-sm text-slate-500">{PROJECTS.length} proiecte</span></div>
+<Card className="overflow-hidden"><div className="flex items-center justify-between border-b border-line px-5 py-4"><h2 className="font-semibold">Proiectul meu</h2><span className="text-sm text-slate-500">Start-Up Nation, ediția 2024</span></div>
 <table className="w-full text-sm"><thead className="hidden bg-ground text-left text-xs font-medium text-slate-500 md:table-header-group"><tr><th className="px-5 py-2.5">Proiect</th><th className="px-5 py-2.5">Program</th><th className="px-5 py-2.5 text-right">Buget</th><th className="px-5 py-2.5">Achiziții</th><th className="px-5 py-2.5">Status</th></tr></thead>
 <tbody className="divide-y divide-line">{PROJECTS.map(p=><tr key={p.id} className="grid grid-cols-2 gap-x-4 gap-y-2 px-5 py-4 md:table-row md:px-0 md:py-0">
 <td className="col-span-2 md:px-5 md:py-3.5">{p.program==='Start-Up Nation'?<button onClick={()=>setTab('sun')} className="text-left font-medium text-navy-700 hover:underline">{p.name}</button>:<p className="font-medium">{p.name}</p>}<p className="text-xs text-slate-500">termen {p.deadline}</p></td>
@@ -557,12 +555,12 @@ return <main className="fade-in mx-auto max-w-7xl px-4 py-8 sm:px-6">
 <section className="mt-8"><h2 className="font-semibold">Feed de cereri de ofertă</h2>
 <Card className="mt-3 p-3"><div className="flex flex-col gap-3 lg:flex-row lg:items-center">
 <div className="relative flex-1"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true"/><input aria-label="Caută cereri" className={`${inputCls} pl-9`} placeholder="Caută după titlu, beneficiar sau CPV" value={q} onChange={e=>setQ(e.target.value)}/></div>
-<select aria-label="Domeniu" className={`${inputCls} lg:w-56`} value={dom} onChange={e=>setDom(e.target.value)}><option value="Toate">Toate domeniile</option>{DOMAINS.map(d=><option key={d}>{d}</option>)}</select>
-<select aria-label="Program de finanțare" className={`${inputCls} lg:w-56`} value={prog} onChange={e=>setProg(e.target.value)}><option value="Toate">Toate programele</option>{PROGRAMS.map(p=><option key={p}>{p}</option>)}</select>
+<select aria-label="Domeniu" className={`${inputCls} lg:w-56`} value={dom} onChange={e=>setDom(e.target.value)}><option value="Toate">Toate categoriile</option>{DOMAINS.map(d=><option key={d}>{d}</option>)}</select>
+<select aria-label="Etapă" className={`${inputCls} lg:w-56`} value={prog} onChange={e=>setProg(e.target.value)}><option value="Toate">Înscriere și implementare</option>{PROGRAMS.map(p=><option key={p}>{p}</option>)}</select>
 </div></Card>
 <p className="mt-3 text-sm text-slate-500">{feed.length} {feed.length===1?'cerere':'cereri'} potrivite</p>
 <ul className="mt-2 space-y-3">{feed.map(f=>{const done=sent.has(f.title);return <li key={f.id}><Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-<span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg ${f.kind==='Primărie'?'bg-navy-50 text-navy-700':'bg-slate-100 text-slate-600'}`}>{f.kind==='Primărie'?<Landmark className="h-5 w-5" aria-hidden="true"/>:f.kind==='Aplicant'?<Rocket className="h-5 w-5" aria-hidden="true"/>:<Building2 className="h-5 w-5" aria-hidden="true"/>}</span>
+<span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg ${f.kind==='Aplicant'?'bg-amber-50 text-amber-700':'bg-navy-50 text-navy-700'}`}>{f.kind==='Aplicant'?<Rocket className="h-5 w-5" aria-hidden="true"/>:<Building2 className="h-5 w-5" aria-hidden="true"/>}</span>
 <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><p className="font-semibold">{f.title}</p><ProgramBadge p={f.program}/>{f.kind==='Aplicant'&&<Badge tone="amber" icon={Rocket}>Viitor beneficiar</Badge>}</div>
 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500"><span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" aria-hidden="true"/>{f.buyer} · {f.kind}</span><span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" aria-hidden="true"/>{f.city}</span><span className="flex items-center gap-1"><Tag className="h-3.5 w-3.5" aria-hidden="true"/>CPV {f.cpv}</span><span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" aria-hidden="true"/>până la {f.deadline}</span></p></div>
 <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end"><div className="text-right"><p className="text-xs text-slate-500">Buget estimat</p><p className="num font-semibold">{lei(f.budget)}</p><p className="text-xs text-slate-500">{f.offers} oferte trimise</p></div>
